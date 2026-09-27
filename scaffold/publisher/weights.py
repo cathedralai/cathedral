@@ -90,6 +90,10 @@ PERMINER_PUBLIC_BASELINE_ENV = "CATHEDRAL_PERMINER_PUBLIC_BASELINE"
 # removes non-payable hotkeys from the signed weights when a fresh snapshot exists.
 PAYABLE_HOTKEYS_ENV = "CATHEDRAL_WEIGHTS_PAYABLE_HOTKEYS"  # off | mark | filter
 PAYABLE_HOTKEYS_MAX_AGE_SECS_ENV = "CATHEDRAL_WEIGHTS_PAYABLE_HOTKEYS_MAX_AGE_SECS"
+# What "filter" does when no fresh snapshot exists (issue #345). "pass" (default)
+# keeps today's fail-open: every scored hotkey stays payable. "refuse" pays nobody
+# instead, so the vector falls back to the signed burn until the poller recovers.
+PAYABLE_HOTKEYS_STALE_ENV = "CATHEDRAL_WEIGHTS_PAYABLE_HOTKEYS_STALE"  # pass | refuse
 # External score-source controls. Disabled by default; when enabled, source
 # scores are blended publisher-side before Cathedral signs the one validator feed.
 EXTERNAL_SCORES_ENABLED_ENV = "CATHEDRAL_EXTERNAL_SCORES_ENABLED"
@@ -505,6 +509,11 @@ def payable_hotkeys_mode() -> str:
     return raw if raw in {"off", "mark", "filter"} else "off"
 
 
+def payable_hotkeys_stale_policy() -> str:
+    raw = os.environ.get(PAYABLE_HOTKEYS_STALE_ENV, "pass").strip().lower()
+    return raw if raw in {"pass", "refuse"} else "pass"
+
+
 def payable_hotkeys_max_age_secs() -> float:
     return max(0.0, _env_float(PAYABLE_HOTKEYS_MAX_AGE_SECS_ENV, 600.0))
 
@@ -573,6 +582,22 @@ def _apply_payable_hotkey_policy(
     payable, snapshot_meta = _load_fresh_metagraph_hotkeys(store, now=now)
     meta.update(snapshot_meta)
     if payable is None:
+        if mode_value == "filter" and payable_hotkeys_stale_policy() == "refuse":
+            # Metadata keys appear only under "refuse", so the default vector
+            # (and its policy_hash) stays byte-identical.
+            meta.update(
+                {
+                    "stale_policy": "refuse",
+                    "enforced": True,
+                    "status": "refused_no_fresh_snapshot",
+                    "final_miner_count": 0,
+                }
+            )
+            print(
+                "[weights] payable-hotkey filter has no fresh metagraph snapshot "
+                "-> paying no hotkeys (signed burn fallback)"
+            )
+            return {}, meta
         meta["status"] = "no_fresh_snapshot"
         return scores, meta
 
@@ -1291,6 +1316,8 @@ def _apply_confidential_primary(
     if payable_hotkeys_mode() == "filter":
         ext, payable_meta = _apply_payable_hotkey_policy(store, ext, now=now)
         blend_meta["external_payable_filter"] = payable_meta
+        if payable_meta.get("status") == "refused_no_fresh_snapshot":
+            return _degrade("payable_snapshot_unavailable")
         if not ext:
             return _degrade("no_payable_confidential_scores")
 
