@@ -242,6 +242,10 @@ def _resolve_serve_config(ns: argparse.Namespace) -> SimpleNamespace:
 
 def _cmd_serve(ns: argparse.Namespace) -> int:
     cfg = _resolve_serve_config(ns)
+    refusal = validator_thin.legacy_sn39_broadcast_refusal(cfg)
+    if refusal:
+        print(f"error: {refusal}", file=sys.stderr)
+        return 2
     # Mirror validator_thin.main(): a --chain-endpoint flag populates the env the
     # resolver reads, so `serve` honors the override the same way (the env var
     # alone already works on this path; this makes the flag work too).
@@ -515,7 +519,10 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument(
         "--broadcast",
         action="store_true",
-        help="explicitly permit a chain weight submission",
+        help=(
+            "explicitly permit a chain weight submission (refused on SN39 in "
+            "this repository; use cathedral-validator)"
+        ),
     )
     sp.add_argument(
         "--offline",

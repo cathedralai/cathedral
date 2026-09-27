@@ -2648,6 +2648,27 @@ REQUIRE_POLICY_CHOICES = (
     REQUIRE_POLICY_VALIDATED_SUPPLY_V1,
 )
 
+# This repository keeps the writer for mechanism tests and the public
+# reproduction; cathedral-validator is the only operator path that may write
+# SN39 weights. The command-line entrypoints refuse an SN39 broadcast, matching
+# the legacy guard in scaffold/chain.py.
+LEGACY_SN39_BROADCAST_REFUSAL = (
+    "this repository does not write SN39 weights; run the immutable "
+    "cathedral-validator release instead "
+    "(https://github.com/cathedralai/cathedral-validator)"
+)
+
+
+def legacy_sn39_broadcast_refusal(args: Any) -> str | None:
+    """Return the refusal for a command-line SN39 broadcast, else None."""
+    if not getattr(args, "broadcast", False):
+        return None
+    try:
+        netuid = int(getattr(args, "netuid", 0))
+    except (TypeError, ValueError):
+        return None
+    return LEGACY_SN39_BROADCAST_REFUSAL if netuid == 39 else None
+
 
 def _validated_supply_meta(payload: dict[str, Any]) -> dict[str, Any] | None:
     """Validate the launch-locked 90% TDX plus 10% fixed-burn contract.
@@ -8852,7 +8873,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--broadcast",
         action="store_true",
-        help="actually submit weights (default: dry-run)",
+        help=(
+            "actually submit weights (default: dry-run); refused on SN39 in "
+            "this repository, use cathedral-validator"
+        ),
     )
     p.add_argument(
         "--require-full-provenance-for-broadcast",
@@ -8981,6 +9005,9 @@ def main() -> int:
             f"--require-policy (or CATHEDRAL_VALIDATOR_REQUIRE_POLICY) must be one of "
             f"{', '.join(REQUIRE_POLICY_CHOICES)}; got {args.require_policy!r}"
         )
+    refusal = legacy_sn39_broadcast_refusal(args)
+    if refusal:
+        p.error(refusal)
     # --chain-endpoint populates the env the resolver reads, so both the
     # validator_thin path and the ChainClient path honor it from one source.
     if args.chain_endpoint:
