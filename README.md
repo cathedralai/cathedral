@@ -44,12 +44,26 @@ canonical operator guide.
 Registration, uptime, hardware ownership, attestation, or self-reported volume
 never earns weight on its own. Evidence must pass the active validator policy.
 
+## What runs in production
+
+The weight publisher in this repository is live. Cathedral's publisher composes
+and signs the weight vector with [`scaffold/publisher/weights.py`](scaffold/publisher/weights.py),
+and it is published at `GET /v1/validator/weights/next`. Relay validators fetch
+that vector, verify it against the pinned weight-policy key, and set exactly
+those weights (the relay profile lives in
+[`cathedral-validator`](https://github.com/cathedralai/cathedral-validator)). A
+change to the publisher or its composition can change the weights every relay
+validator sets, so treat `scaffold/publisher` as production code: review it,
+test it, and ship weight changes behind a flag or in shadow first.
+
 ## What remains here
 
-- publisher and mechanism code used to form signed evidence and candidates;
+- the live weight publisher (above), and mechanism code used to form signed
+  evidence and candidates;
 - SAT, VerifyML, Violet, arena, and agent-policy experiments;
 - miner and contributor tools;
-- historical launch records and migration fixtures; and
+- historical launch records and migration fixtures, including the top-level
+  v0 launch documents, each marked historical; and
 - local tests for those retained contracts.
 
 A local test, receipt, endpoint, or historical chain row does not prove a lane

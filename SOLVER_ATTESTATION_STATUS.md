@@ -1,5 +1,11 @@
 # Solver Attestation Status
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: default-off publisher endpoints exist; real DCAP verification and the
 production runner have env-gated integration seams. They are not active unless an
 operator configures real verifier/runner commands.

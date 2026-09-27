@@ -1,5 +1,11 @@
 # Audit Arena v0
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 ## Scope
 
 - Offline verifier only: no live services, no target subnet calls, no validator emissions.

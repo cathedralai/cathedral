@@ -1,5 +1,11 @@
 # Cathedral Controlled v0 Merge Note
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: ready for controlled/no-hardware v0. Not ready for a broad production
 hardware ask until real secure-compute evidence reaches the full gate.
 
