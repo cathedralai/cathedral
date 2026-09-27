@@ -19,7 +19,17 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import re
 from dataclasses import dataclass
+
+
+def offline_pinned_ref(name: str) -> str:
+    """A digest-pinned image ref for a simulated image (``name@sha256:<hex>``).
+
+    Attestation accepts only images pinned by content digest; the offline stub
+    resolves such a ref to its own digest, as a registry does for a pull by
+    digest. The digest is derived from the name, so it is stable."""
+    return f"{name}@sha256:{hashlib.sha256(name.encode()).hexdigest()}"
 
 
 @dataclass
@@ -74,8 +84,11 @@ class PolarisClient:
             pullable = bool(image) and "unattestable" not in image
             ok = bool(nonce and e2e_pubkey_b64) and pullable
             # resolve the ref to a realistic content digest (sha256:<64hex>),
-            # mirroring what the box returns, so the SAME digest-aware checks run
-            resolved = "sha256:" + hashlib.sha256((image or "?").encode()).hexdigest()
+            # mirroring what the box returns, so the SAME digest-aware checks run:
+            # a ref pinned by digest resolves to that digest, a tag to some digest.
+            pinned = re.search(r"(?:^|@)sha256:([a-f0-9]{64})$", (image or "").strip())
+            resolved = "sha256:" + (
+                pinned.group(1) if pinned else hashlib.sha256((image or "?").encode()).hexdigest())
             stdout = "[offline-stub] " + (workload or "")
             if measured_elapsed_ms is not None:     # bound into the quote via stdout
                 stdout += f" elapsed_ms={int(measured_elapsed_ms)}"

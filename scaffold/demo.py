@@ -14,11 +14,11 @@ import os
 from .contract import PublicProblem, Submission
 from .dimacs import solve_cnf
 from .lanes.encoding import _find_counterexample
-from .polaris import PolarisClient
+from .polaris import PolarisClient, offline_pinned_ref
 from . import registry, validator
 
 ISSUED_AT = "2026-06-04T00:00:00.000Z"
-GOOD_IMAGE = "sha256:goodsolver"          # the pinned MRTD an honest miner runs
+GOOD_IMAGE = offline_pinned_ref("goodsolver")  # the digest-pinned image an honest miner runs
 
 
 def _miners(problem: PublicProblem) -> list[Submission]:

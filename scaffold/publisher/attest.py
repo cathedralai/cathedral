@@ -187,11 +187,12 @@ def _read_verifier_result(result_path: Path, stdout: str) -> dict:
 
 
 def configured_intel_verifier() -> IntelCollateralVerifier | None:
-    """Return the configured real verifier, or an explicit test/shadow stub.
+    """Return the configured real verifier, or an explicit dev/test stub.
 
     Production should set `CATHEDRAL_ATTEST_DCAP_VERIFY_CMD` to a real verifier
-    command. `CATHEDRAL_ATTEST_ALLOW_STUB=1` is intentionally separate and should
-    be used only in tests or shadow mode.
+    command. `CATHEDRAL_ATTEST_ALLOW_STUB=1` is intentionally separate and takes
+    effect only when `CATHEDRAL_ENV` is explicitly `dev` or `test`: an unset or
+    unknown environment never gets the stub, which trusts any 632-byte blob.
     """
     cmd = (
         os.environ.get("CATHEDRAL_ATTEST_DCAP_VERIFY_CMD", "").strip()
@@ -207,19 +208,21 @@ def configured_intel_verifier() -> IntelCollateralVerifier | None:
         "CATHEDRAL_ATTEST_ALLOW_STUB", "").strip().lower() in {
             "1", "true", "yes", "on"}
     if allow_stub:
-        if _production_mode():
+        if _production_mode() or not _stub_environment():
             return None
         return StubIntelVerifier()
     return None
 
 
+def _stub_environment() -> bool:
+    """Only an explicitly declared dev or test environment may use the stub."""
+    return os.environ.get("CATHEDRAL_ENV", "").strip().lower() in {"dev", "test"}
+
+
 def _production_mode() -> bool:
-    env = (
-        os.environ.get("CATHEDRAL_ENV", "")
-        or os.environ.get("ENV", "")
-        or os.environ.get("APP_ENV", "")
-    ).strip().lower()
-    if env in {"prod", "production", "mainnet"}:
+    # Any of the three saying production wins, whatever the others say.
+    envs = {os.environ.get(name, "").strip().lower() for name in ("CATHEDRAL_ENV", "ENV", "APP_ENV")}
+    if envs & {"prod", "production", "mainnet"}:
         return True
     return os.environ.get("CATHEDRAL_PRODUCTION", "").strip().lower() in {
         "1", "true", "yes", "on"}
