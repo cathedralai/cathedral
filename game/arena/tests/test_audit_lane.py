@@ -6,8 +6,10 @@ from __future__ import annotations
 
 from game.arena import replay
 from game.arena.engine import ArenaEngine, REPRODUCING_TARGETS
+from ._requires import requires_audit_lane
 
 
+@requires_audit_lane
 def test_audit_lane_targets_are_wired():
     # if the audit-lane repo is present, its targets must be registered as REAL code
     assert "sn5-hone:exact_match_rate@HEAD" in replay.AUDIT_LANE_TARGETS
@@ -17,6 +19,7 @@ def test_audit_lane_targets_are_wired():
         assert len(t.code_sha256) == 64          # content-addressed pinned target
 
 
+@requires_audit_lane
 def test_real_hone_coverage_inflation_reproduces():
     o = replay.run_replay("sn5-hone:exact_match_rate@HEAD",
                           replay.TARGETS["sn5-hone:exact_match_rate@HEAD"].known_witness)
@@ -32,6 +35,7 @@ def test_real_hone_safe_witness_does_not_reproduce():
     assert o.reproduced is False
 
 
+@requires_audit_lane
 def test_arena_round_replays_via_audit_lane_code():
     assert "sn5-hone:exact_match_rate@HEAD" in REPRODUCING_TARGETS
     r = ArenaEngine().run(1)

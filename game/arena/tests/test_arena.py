@@ -10,6 +10,7 @@ import pytest
 from game.arena import corpus
 from game.arena.engine import ArenaEngine
 from game.reward import verify_vector
+from ._requires import requires_audit_hunter
 
 
 @pytest.fixture(scope="module")
@@ -39,6 +40,7 @@ def _arch(a):
 
 # -- real corpus is grounded --------------------------------------------------
 
+@requires_audit_hunter
 def test_real_corpus_loaded():
     cs = corpus.corpus_summary()
     assert cs["audit_hunter_present"] is True

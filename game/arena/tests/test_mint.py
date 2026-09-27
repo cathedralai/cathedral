@@ -8,7 +8,7 @@ from game.arena import mint, replay
 
 
 def test_mint_silent_zero_is_sat_with_small_cnf():
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     m = mint.mint_invariant("B2-fee-silent-zero", 16, "realistic")
     assert m is not None and m["result"] == "sat"
@@ -17,7 +17,7 @@ def test_mint_silent_zero_is_sat_with_small_cnf():
 
 
 def test_minted_witness_reproduces_via_real_harness():
-    if not mint.z3_available() or not replay.MINTED_TARGETS:
+    if not mint.can_mint() or not replay.MINTED_TARGETS:
         return
     tid = replay.MINTED_TARGETS[0]
     t = replay.TARGETS[tid]
@@ -35,7 +35,7 @@ def test_minted_target_in_rotation():
 
 
 def test_mint_is_deterministic_cached():
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     a = mint.mint_invariant("B2-fee-silent-zero", 16, "realistic")
     b = mint.mint_invariant("B2-fee-silent-zero", 16, "realistic")
@@ -45,7 +45,7 @@ def test_mint_is_deterministic_cached():
 def test_minted_cnf_solved_by_real_cdcl_solver():
     """A REAL external CDCL solver (Glucose) solves the minted invariant CNF and
     the assignment independently satisfies every clause. Skips if z3/pysat absent."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     m = mint.mint_invariant("B2-fee-silent-zero", 16, "realistic")
     solved = mint.solve_minted_cnf(m["cnf_text"])
@@ -58,7 +58,7 @@ def test_minted_cnf_solved_by_real_cdcl_solver():
 
 def test_full_unified_proof_status():
     """encode (z3) -> solve (real CDCL, verified) -> reproduce (real harness)."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     st = mint.minted_proof_status()
     if not st["available"] or not st["external_solve"].get("available"):
@@ -89,7 +89,7 @@ def test_multiple_minted_families_each_reproduce():
     """More than one factory rule is minted into a real solve==replay proof,
     spanning distinct invariant families — every minted target reproduces on its
     own z3 witness."""
-    if not mint.z3_available() or not replay.MINTED_TARGETS:
+    if not mint.can_mint() or not replay.MINTED_TARGETS:
         return
     assert len(replay.MINTED_TARGETS) >= 2
     fams = set()
@@ -105,7 +105,7 @@ def test_multiple_minted_families_each_reproduce():
 def test_i_safety_minted_is_recalc_overcharge():
     """The I1 minted target is the RAW recalc-overcharge bound: its z3 witness
     makes delta_in + recalc_fee exceed `amount`."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     tid = "subtensor-amm:recalc-overcharge-raw@MINTED"
     if tid not in replay.TARGETS:
@@ -120,7 +120,7 @@ def test_i_safety_minted_is_recalc_overcharge():
 def test_hardened_invariant_confirmed_unsat():
     """A4 conservation: z3 says the negated invariant is UNSAT and an independent
     CDCL solver confirms it — a solver-backed proof that no exploit exists."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     if not replay.MINTED_HARDENED:
         return
@@ -158,7 +158,7 @@ def test_hardened_proofs_span_two_models():
 
 def test_mint_supports_root_reborn_model():
     """The factory mint is model-parameterized: the root-staking model resolves."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     m = mint.mint_invariant("A4-tao-split-conservation", 8, "realistic", "subtensor-root-reborn")
     assert m is not None and m["result"] == "unsat"     # the TAO-split invariant holds
@@ -183,7 +183,7 @@ def test_a1_deposit_no_dilution_is_a_confirmed_hardened_invariant():
     """A1 (root deposit cannot dilute existing holders) is wired from the REAL
     factory rule: z3 proves the dilution violation is a direct contradiction
     (UNSAT) and an independent CDCL solver confirms it. Not claimed — re-checked."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     rule_ids = {h["rule_id"] for h in replay.MINTED_HARDENED}
     assert "A1-deposit-no-dilution" in rule_ids          # the manifest carries it
@@ -203,7 +203,7 @@ def test_a2_roundtrip_is_honestly_not_claimed_decided():
     """A2 (deposit->redeem roundtrip <= bought) is a genuinely HARD instance —
     z3 returns 'unknown' (double nested floor). We must NOT ship it as a decided
     result: it is neither a SAT replay target nor a hardened invariant. Honesty."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     m = mint.mint_invariant("A2-roundtrip-le", 12, "realistic", "subtensor-root-reborn")
     assert m["result"] == "unknown"                       # legitimately undecided
