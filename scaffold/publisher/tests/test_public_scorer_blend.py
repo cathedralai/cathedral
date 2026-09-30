@@ -996,3 +996,28 @@ def test_validated_supply_emitter_signs_90_10_revocation_contract(store, monkeyp
         {"burn-hotkey": 17},
         require_policy=validator_thin.REQUIRE_POLICY_VALIDATED_SUPPLY_V1,
     ) == {17: 1.0}
+
+
+def test_confidential_primary_refuses_payable_filter_without_fresh_snapshot(store, monkeypatch):
+    """Issue #345: under PAYABLE_HOTKEYS_STALE=refuse a stale metagraph degrades
+    confidential_primary to the signed burn with its own reason."""
+    monkeypatch.setenv("CATHEDRAL_EXTERNAL_SCORES_MODE", "confidential_primary")
+    monkeypatch.setenv("CATHEDRAL_EXTERNAL_SCORES_SOURCE", "cathedral_confidential_tdx")
+    monkeypatch.setenv("CATHEDRAL_EXTERNAL_SCORES_PRIMARY_CONFIRM", "true")
+    monkeypatch.setenv("CATHEDRAL_EXTERNAL_SCORES_REQUIRE_REGISTERED", "0")
+    monkeypatch.setenv(weights.PAYABLE_HOTKEYS_ENV, "filter")
+    monkeypatch.setenv(weights.PAYABLE_HOTKEYS_STALE_ENV, "refuse")
+    monkeypatch.setattr(weights, "_compose_external_scores", lambda *a, **k: {"5TDX_MINER": 1.0})
+    monkeypatch.setattr(
+        weights, "_load_fresh_metagraph_hotkeys", lambda *a, **k: (None, {"snapshot_fresh": False})
+    )
+    result, meta = weights._apply_external_scores(store, {"5BASE_MINER": 1.0}, now=_now())
+    assert result == {}
+    assert meta["confidential_primary"]["degradation_reason"] == "payable_snapshot_unavailable"
+    assert meta["external_payable_filter"]["status"] == "refused_no_fresh_snapshot"
+
+    # The default keeps today's behaviour: the confidential scores pass unfiltered.
+    monkeypatch.delenv(weights.PAYABLE_HOTKEYS_STALE_ENV)
+    result, meta = weights._apply_external_scores(store, {"5BASE_MINER": 1.0}, now=_now())
+    assert result == {"5TDX_MINER": 1.0}
+    assert meta["external_payable_filter"]["status"] == "no_fresh_snapshot"
