@@ -39,7 +39,11 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from . import wire_vector as wire
-from .chain import CHAIN_ENDPOINT_ENV, connection_target
+from .chain import (
+    CHAIN_ENDPOINT_ENV,
+    NON_MAINNET_BROADCAST_NETWORKS,
+    connection_target,
+)
 from .events import FAIL, INFO, NOT_PROVEN, PASS, EventLogger, stable_error
 from .provenance_audit import (
     MECHANISM_DEFAULT,
@@ -2647,6 +2651,51 @@ REQUIRE_POLICY_CHOICES = (
     REQUIRE_POLICY_CONFIDENTIAL_PRIMARY_V1,
     REQUIRE_POLICY_VALIDATED_SUPPLY_V1,
 )
+
+# This repository's validator is retired in favour of cathedral-validator,
+# which scores SN94 directly. The writer stays for mechanism tests and the
+# public reproduction, but the command-line entrypoints refuse every mainnet
+# broadcast, whatever the netuid. A broadcast is allowed only on a recognised
+# non-mainnet network label (shared with scaffold.chain); SN39 and an
+# unreadable netuid are refused on every label.
+# `_validate_resolved_chain_contract` rechecks the connected chain by genesis,
+# so a self-hosted endpoint behind a test label cannot reach Finney either.
+LEGACY_BROADCAST_REFUSAL = (
+    "this repository's validator is retired and does not broadcast weights on "
+    "Finney (mainnet) for any netuid; run the immutable cathedral-validator "
+    "release instead (https://github.com/cathedralai/cathedral-validator)"
+)
+
+
+def _readable_netuid(value: Any) -> int | None:
+    """Return a non-negative integer netuid, or None when it is unreadable."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value if value >= 0 else None
+    if isinstance(value, str) and re.fullmatch(r"[0-9]+", value.strip()):
+        return int(value.strip())
+    return None
+
+
+def legacy_broadcast_refusal(args: Any) -> str | None:
+    """Return why a command-line broadcast is refused, else None.
+
+    Dry-run and offline runs are never refused: offline is authoritative and
+    forces the broadcast off before any chain access.
+    """
+    if not getattr(args, "broadcast", False) or getattr(args, "offline", False):
+        return None
+    netuid = _readable_netuid(getattr(args, "netuid", None))
+    if netuid is None:
+        return (
+            "refusing broadcast: the netuid "
+            f"{getattr(args, 'netuid', None)!r} is not readable"
+        )
+    network = str(getattr(args, "network", "") or "").strip().lower()
+    if netuid == 39 or network not in NON_MAINNET_BROADCAST_NETWORKS:
+        return LEGACY_BROADCAST_REFUSAL
+    return None
 
 
 def _validated_supply_meta(payload: dict[str, Any]) -> dict[str, Any] | None:
@@ -5851,6 +5900,16 @@ def _validate_resolved_chain_contract(
 ) -> None:
     """Enforce the SN39 contract against the connected chain, not its label."""
     if (
+        bool(getattr(args, "broadcast", False))
+        and not bool(getattr(args, "offline", False))
+        and _readable_netuid(getattr(args, "netuid", None)) != 39
+        and str(preflight.genesis_hash).lower() == FINNEY_GENESIS_HASH
+    ):
+        # The entrypoints refuse a Finney label; this catches a test/local label
+        # whose RPC endpoint is really a Finney node. SN39 keeps its own checks
+        # below for the mechanism tests that drive the writer directly.
+        raise wire.VectorError(LEGACY_BROADCAST_REFUSAL)
+    if (
         (not bool(getattr(args, "broadcast", False)) and not require_sn39_identity)
         or bool(getattr(args, "offline", False))
         or int(getattr(args, "netuid", -1)) != 39
@@ -8852,7 +8911,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--broadcast",
         action="store_true",
-        help="actually submit weights (default: dry-run)",
+        help=(
+            "actually submit weights (default: dry-run); refused on Finney "
+            "(mainnet) for every netuid in this repository, use "
+            "cathedral-validator"
+        ),
     )
     p.add_argument(
         "--require-full-provenance-for-broadcast",
@@ -8981,6 +9044,9 @@ def main() -> int:
             f"--require-policy (or CATHEDRAL_VALIDATOR_REQUIRE_POLICY) must be one of "
             f"{', '.join(REQUIRE_POLICY_CHOICES)}; got {args.require_policy!r}"
         )
+    refusal = legacy_broadcast_refusal(args)
+    if refusal:
+        p.error(refusal)
     # --chain-endpoint populates the env the resolver reads, so both the
     # validator_thin path and the ChainClient path honor it from one source.
     if args.chain_endpoint:
