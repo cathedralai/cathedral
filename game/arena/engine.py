@@ -40,7 +40,7 @@ REPRODUCING_TARGETS = (["subtensor-amm:recalc-overcharge@HEAD",
 
 from scaffold.dimacs import solve_cnf, verify_witness
 from scaffold.grading import speed_bonus
-from scaffold.polaris import PolarisClient
+from scaffold.polaris import PolarisClient, offline_pinned_ref
 from scaffold.publisher import per_miner as PM
 from scaffold.verify import verify_attestation
 
@@ -534,7 +534,7 @@ class ArenaEngine:
             # against a different submission.
             nonce = "attest:" + hashlib.sha256(
                 f"{s.submitted_cid}|{s.submitted_cnf_hash}|{s.submitted_nonce}".encode()).hexdigest()
-            image = (f"sha256:agent-{spec.agent_id}" if spec.provisioned
+            image = (offline_pinned_ref(f"agent-{spec.agent_id}") if spec.provisioned
                      and spec.environment in TRUSTED_ENVS else "sha256:unattestable")
             pubkey = (hashlib.sha256(spec.hotkey.encode()).hexdigest()
                       if spec.provisioned and spec.environment in TRUSTED_ENVS else "")

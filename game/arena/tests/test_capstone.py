@@ -18,6 +18,7 @@ from game.arena import mint as _mint
 from game.arena import replay as _replay
 from game.arena.engine import ArenaEngine
 from game.arena.ui import render
+from ._requires import requires_audit_hunter, requires_mint
 
 
 @pytest.fixture(scope="module")
@@ -99,7 +100,7 @@ def test_real_audit_vault_spans_verdicts_and_families(game):
     CRACKED (exploit exists) and HARDENED (no exploit, two solvers agree) cards."""
     v = game.real_audit_vault
     verdicts = {c["verdict"] for c in v}
-    if _mint.z3_available():
+    if _mint.can_mint():
         assert "CRACKED" in verdicts and "HARDENED" in verdicts
         assert len({c["family"] for c in v}) >= 2        # multiple invariant families
 
@@ -139,6 +140,7 @@ def test_offbox_hardened_defers_to_a_stronger_real_cnf_proof():
     assert len(a4) == 1 and a4[0].get("real_cnf") and not a4[0].get("offbox")
 
 
+@requires_audit_hunter
 def test_proof_coverage_is_honest_per_subnet(game):
     """The operator console states, per subnet, whether the arena backs it with a REAL
     reproducing exploit or it reasons into a HARDENED family (no exploit exists). The
@@ -162,6 +164,7 @@ def test_proof_coverage_is_honest_per_subnet(game):
             assert r["family"] in hard_fams
 
 
+@requires_mint
 def test_full_visual_ui_renders(game):
     """The visual-first live UI renders every panel — the whole game, one page."""
     html = render(game)

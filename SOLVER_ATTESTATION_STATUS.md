@@ -40,7 +40,8 @@ The attestation endpoints are safe by default:
 - `CATHEDRAL_ATTEST_ENABLED=1` without a verifier command: `/v1/attest` returns 503.
 - `CATHEDRAL_ATTEST_DCAP_VERIFY_CMD=<cmd>`: verify uses the configured real
   command. Default call shape is `<cmd> quote.bin expected_report_data_hex out.json`.
-- `CATHEDRAL_ATTEST_ALLOW_STUB=1`: test/shadow-only stub verification is allowed.
+- `CATHEDRAL_ATTEST_ALLOW_STUB=1`: stub verification, only when `CATHEDRAL_ENV` is
+  explicitly `dev` or `test` (an unset environment never gets the stub).
   It is ignored when `CATHEDRAL_ENV=production|prod|mainnet` or
   `CATHEDRAL_PRODUCTION=1`.
 - `POST /v1/attest` requires the same signed hotkey headers as nonce issuance
@@ -78,7 +79,7 @@ Plain English:
 1. Configure and pin a real DCAP/TDX verifier command in production.
 2. Configure and pin a real arena runner wrapper for container-digest execution.
 3. Keep the routes fail-closed unless the real DCAP/TDX verifier is configured,
-   with stub verification allowed only in tests or shadow mode.
+   with stub verification allowed only when `CATHEDRAL_ENV` is `dev` or `test`.
 4. Require attestation only for producer identity, timeout/hardness, title, or
    multiplier claims; keep ordinary SAT correctness certificate-verified.
 5. Extend tests with real golden DCAP quote fixtures and production runner

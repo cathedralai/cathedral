@@ -10,6 +10,7 @@ import json
 from game.arena import corpus, hypothesis as H
 from game.arena.engine import ArenaEngine
 from game.arena.models import Target
+from ._requires import requires_audit_hunter, requires_audit_lane
 
 
 def test_every_target_maps_to_a_rulebook_family():
@@ -154,6 +155,8 @@ def test_alignment_tolerates_missing_claim():
     assert "hypothesis_aligned" in GateOutcome.GATES
 
 
+@requires_audit_hunter
+@requires_audit_lane
 def test_reasoning_drives_proof_selection():
     """The family the agent reasons for a subnet SELECTS the invariant it proves:
     when a reproducing invariant of that family exists, the proven target is that

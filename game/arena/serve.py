@@ -12,6 +12,7 @@ binding a socket; the HTTP layer is a thin stdlib wrapper.
 from __future__ import annotations
 
 import json
+import os
 import sys
 import time
 from dataclasses import replace
@@ -457,14 +458,15 @@ def startup_urls(port: int, ip: str | None = "") -> list[str]:
     return urls
 
 
-def serve(port: int = 8800) -> None:
+def serve(port: int = 8800, host: str | None = None) -> None:
     OUT.mkdir(exist_ok=True)
     srv = ArenaServer(season_path=str(OUT / "season_state.json"))
-    # WSL loopback is not consistently reachable from the Windows in-app browser
-    # when bound to 127.0.0.1 inside Linux. Bind all interfaces for the local
-    # dev server and advertise BOTH the localhost and the WSL-IP URL.
-    httpd = ThreadingHTTPServer(("0.0.0.0", port), _handler(srv))
-    urls = startup_urls(port)
+    # Loopback by default: the server accepts submissions and has no auth. WSL
+    # loopback is not always reachable from a Windows browser, so
+    # CATHEDRAL_ARENA_HOST=0.0.0.0 opts in to every interface and the LAN/WSL URL.
+    host = host or os.environ.get("CATHEDRAL_ARENA_HOST", "").strip() or "127.0.0.1"
+    httpd = ThreadingHTTPServer((host, port), _handler(srv))
+    urls = startup_urls(port, "" if host == "0.0.0.0" else None)
     print(f"Cathedral Arena LIVE  (ticks a fresh round every {MIN_TICK_SECS:.0f}s; auto-refreshes)")
     print(f"  START HERE: {urls[0]}")
     if len(urls) > 1:
