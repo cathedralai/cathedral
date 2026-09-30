@@ -1,7 +1,10 @@
 # Cathedral
 
-Cathedral coordinates verified work for Bittensor SN39. This repository keeps
-mechanism, publisher, research, and historical integration code. It is not the
+Cathedral coordinates verified work on Bittensor. The live subnet is SN94: the
+validator moved there from SN39 on 28 September 2026 in
+[cathedral-validator #261](https://github.com/cathedralai/cathedral-validator/pull/261).
+This repository keeps mechanism, research, and historical integration code,
+including the retired SN39 validator and weight publisher. It is not the
 validator operator repository.
 
 ## Choose your path
@@ -46,20 +49,26 @@ never earns weight on its own. Evidence must pass the active validator policy.
 
 ## What runs in production
 
-The weight publisher in this repository is live. Cathedral's publisher composes
-and signs the weight vector with [`scaffold/publisher/weights.py`](scaffold/publisher/weights.py),
-and it is published at `GET /v1/validator/weights/next`. Relay validators fetch
-that vector, verify it against the pinned weight-policy key, and set exactly
-those weights (the relay profile lives in
-[`cathedral-validator`](https://github.com/cathedralai/cathedral-validator)). A
-change to the publisher or its composition can change the weights every relay
-validator sets, so treat `scaffold/publisher` as production code: review it,
-test it, and ship weight changes behind a flag or in shadow first.
+The live validator is
+[`cathedral-validator`](https://github.com/cathedralai/cathedral-validator), not
+this repository. It verifies miners' compute itself, derives the whole weight
+vector locally, and writes it directly with each operator's hotkey. Since 31
+August 2026 it has not downloaded a weight vector or used a relay, and since 28
+September 2026 it has run on SN94.
+
+The validator and weight publisher in this repository are retired. The
+publisher ([`scaffold/publisher/weights.py`](scaffold/publisher/weights.py),
+served at `GET /v1/validator/weights/next`) signed the vector that relay
+validators used to fetch and set. The supported validator no longer reads any
+signed vector, and cathedral-validator marks its own publisher deployment, the
+SN94 origin-scorer unit, as retired. A change to `scaffold/publisher` does not
+change the weights the supported validator sets.
 
 ## What remains here
 
-- the live weight publisher (above), and mechanism code used to form signed
-  evidence and candidates;
+- the retired weight publisher and SN39 validator (above), kept for mechanism
+  tests and migration review, and mechanism code used to form signed evidence
+  and candidates;
 - SAT, VerifyML, Violet, arena, and agent-policy experiments;
 - miner and contributor tools;
 - historical launch records and migration fixtures, including the top-level
