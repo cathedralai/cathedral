@@ -18,6 +18,7 @@ import bittensor as bt
 
 from .bt_compat import (
     current_block,
+    genesis_hash,
     listify,
     make_dendrite,
     make_subtensor,
@@ -58,6 +59,22 @@ from .score_classes import (
 )
 
 WEIGHTS_VERSION_KEY = 1_000_001
+# This legacy SAT validator never broadcasts on Finney (mainnet), whatever the
+# netuid. The network label must name a non-mainnet chain, and the connected
+# chain must prove a non-Finney genesis before each weight submission, so a
+# local or test label that points at a Finney node is refused as well.
+NON_MAINNET_BROADCAST_NETWORKS = frozenset({"local", "test", "testnet", "mock"})
+FINNEY_GENESIS_HASH = (
+    "0x2f0555cc76fc2840a25a6ea3b9637146806f1f44b090c175ffde2a7e5ab36c03"
+)
+MAINNET_BROADCAST_REFUSAL = (
+    "legacy SAT validator broadcasts are disabled on Finney (mainnet) for "
+    "every netuid; use cathedral-validator"
+)
+
+
+def is_non_mainnet_label(network: str) -> bool:
+    return str(network or "").strip().lower() in NON_MAINNET_BROADCAST_NETWORKS
 
 
 def now_ms() -> int:
@@ -300,6 +317,12 @@ class BittensorRuntime:
             raise ThinSubnetError(
                 "legacy SAT validator broadcasts are disabled on SN39 "
                 "regardless of network label or RPC endpoint"
+            )
+        genesis = await asyncio.to_thread(genesis_hash, self.subtensor)
+        if genesis is None or genesis == FINNEY_GENESIS_HASH:
+            raise ThinSubnetError(
+                f"{MAINNET_BROADCAST_REFUSAL} (the connected chain did not prove "
+                "a non-Finney genesis)"
             )
         kwargs = {
             "wallet": self.wallet,
@@ -910,7 +933,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
             "Run the legacy Cathedral SAT validator on test/local subnets. "
-            "SN39 mainnet uses cathedral-validator."
+            "It never broadcasts on Finney (mainnet); use cathedral-validator."
         )
     )
     parser.add_argument("--network", default=os.environ.get("BT_NETWORK", "local"))
@@ -988,6 +1011,12 @@ def validate_args(args: argparse.Namespace) -> None:
             "cathedral-thin-validator cannot broadcast on SN39; "
             "use the immutable cathedral-validator SN39 release path"
         )
+    if args.broadcast and not is_non_mainnet_label(args.network):
+        raise SystemExit(
+            "cathedral-thin-validator cannot broadcast on Finney (mainnet) for "
+            f"any netuid; broadcast needs one of "
+            f"{', '.join(sorted(NON_MAINNET_BROADCAST_NETWORKS))} as --network"
+        )
     if args.netuid < 0 or not 3 <= args.vars <= 4096 or not 1 <= args.clauses <= 20_000:
         raise SystemExit("invalid netuid or challenge dimensions")
     if (
@@ -1012,6 +1041,8 @@ async def async_main(args: argparse.Namespace) -> int:
             "legacy SAT validator broadcasts are disabled on SN39 regardless "
             "of network label or RPC endpoint"
         )
+    if args.broadcast and not is_non_mainnet_label(args.network):
+        raise ThinSubnetError(MAINNET_BROADCAST_REFUSAL)
     score_policy = (
         load_score_policy(args.score_policy, network=args.network, netuid=args.netuid)
         if args.score_policy
