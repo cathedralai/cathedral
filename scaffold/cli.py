@@ -241,8 +241,12 @@ def _resolve_serve_config(ns: argparse.Namespace) -> SimpleNamespace:
 
 
 def _cmd_serve(ns: argparse.Namespace) -> int:
-    cfg = _resolve_serve_config(ns)
-    refusal = validator_thin.legacy_sn39_broadcast_refusal(cfg)
+    try:
+        cfg = _resolve_serve_config(ns)
+    except ValueError as exc:
+        print(f"error: invalid serve configuration: {exc}", file=sys.stderr)
+        return 2
+    refusal = validator_thin.legacy_broadcast_refusal(cfg)
     if refusal:
         print(f"error: {refusal}", file=sys.stderr)
         return 2
@@ -520,8 +524,8 @@ def main(argv: list[str] | None = None) -> int:
         "--broadcast",
         action="store_true",
         help=(
-            "explicitly permit a chain weight submission (refused on SN39 in "
-            "this repository; use cathedral-validator)"
+            "explicitly permit a chain weight submission (refused on Finney "
+            "for every netuid in this repository; use cathedral-validator)"
         ),
     )
     sp.add_argument(

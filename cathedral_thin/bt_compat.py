@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 
@@ -46,6 +47,15 @@ def make_axon(
     if external_port:
         kwargs["external_port"] = external_port
     return bt_class(bt, "Axon", "axon")(**kwargs)
+
+
+def genesis_hash(subtensor: Any) -> str | None:
+    """Return the connected chain's genesis hash, or None if it is unreadable."""
+    try:
+        value = str(subtensor.substrate.get_block_hash(0)).strip().lower()
+    except Exception:
+        return None
+    return value if re.fullmatch(r"0x[0-9a-f]{64}", value) else None
 
 
 def listify(value: Any) -> list[Any]:

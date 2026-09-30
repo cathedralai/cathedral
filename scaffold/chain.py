@@ -6,8 +6,9 @@ provenance.
     surfaces it so a tripartite vali is never confused with a production vali.
 
   * set_weights is DRY-RUN by default (compute + log the vector). This legacy
-    scaffold can broadcast only away from SN39; the reviewed immutable
-    ``cathedral-validator`` release is the sole SN39 writer.
+    scaffold never broadcasts on Finney (mainnet), whatever the netuid, and
+    never on SN39; the immutable ``cathedral-validator`` release is the only
+    mainnet writer.
 
 bittensor is imported lazily; if it's absent (it isn't installed in every env)
 the layer still computes weights and records provenance — it just can't read a
@@ -17,11 +18,24 @@ live metagraph or broadcast, which it reports honestly.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 
 CHAIN_ENDPOINT_ENV = "CATHEDRAL_CHAIN_ENDPOINT"
 _announced = False
+
+# A broadcast needs a recognised non-mainnet network label AND a connected
+# chain whose genesis is readable and is not Finney's, so a self-hosted
+# endpoint behind a test label cannot reach mainnet either.
+NON_MAINNET_BROADCAST_NETWORKS = frozenset({"local", "test", "testnet", "mock"})
+FINNEY_GENESIS_HASH = (
+    "0x2f0555cc76fc2840a25a6ea3b9637146806f1f44b090c175ffde2a7e5ab36c03"
+)
+_MAINNET_REFUSAL = (
+    "legacy scaffold broadcasts are disabled on Finney (mainnet) for every "
+    "netuid; use the immutable cathedral-validator release"
+)
 
 
 def connection_target(network: str) -> str:
@@ -201,9 +215,11 @@ class ChainClient:
     def set_weights(self, wv: WeightVector) -> dict:
         """Submit weights. DRY-RUN unless broadcast=True (explicit opt-in).
 
-        SN39 is hard-disabled regardless of network label or endpoint. The
-        immutable two-mode release is the only repository path permitted to
-        write Cathedral mainnet weights.
+        SN39 is hard-disabled regardless of network label or endpoint, and so
+        is every Finney broadcast: the label must be a recognised non-mainnet
+        network and the connected chain must prove a non-Finney genesis. The
+        immutable cathedral-validator release is the only path permitted to
+        write mainnet weights.
         """
         if not self.broadcast:
             return {
@@ -220,6 +236,11 @@ class ChainClient:
                     "immutable cathedral-validator release"
                 ),
             }
+        if (
+            str(self.network or "").strip().lower()
+            not in NON_MAINNET_BROADCAST_NETWORKS
+        ):
+            return {"submitted": False, "reason": _MAINNET_REFUSAL}
         bt = self._bittensor()
         if not bt:
             return {"submitted": False, "reason": "bittensor not importable"}
@@ -232,6 +253,9 @@ class ChainClient:
                     "reason": self._connect_error
                     or "no compatible subtensor/wallet ctor",
                 }
+            genesis = _connected_genesis_hash(sub)
+            if genesis is None or genesis == FINNEY_GENESIS_HASH:
+                return {"submitted": False, "reason": _MAINNET_REFUSAL}
             uids = list(wv.by_uid.keys())
             if not uids:
                 return {
@@ -266,6 +290,15 @@ class ChainClient:
             return Wallet(name=self.wallet_name, hotkey=self.hotkey)
         except Exception:
             return None
+
+
+def _connected_genesis_hash(subtensor) -> str | None:
+    """Return the connected chain's genesis hash, or None if it is unreadable."""
+    try:
+        value = str(subtensor.substrate.get_block_hash(0)).strip().lower()
+    except Exception:
+        return None
+    return value if re.fullmatch(r"0x[0-9a-f]{64}", value) else None
 
 
 def make_provenance(
