@@ -1,5 +1,11 @@
 # Cathedral v0 Lanes
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: reviewable vertical slice. Local/offline by default. No Polaris spend.
 
 The v0 product shape is three lanes with one shared standard: miners and agents

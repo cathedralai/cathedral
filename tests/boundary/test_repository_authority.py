@@ -78,3 +78,25 @@ def test_writer_conflict_guards_remain_intact() -> None:
         assert "ExecStartPre=" in text, path
         for writer in guarded_writers:
             assert writer in text, (path, writer)
+
+
+def test_top_level_v0_launch_docs_are_marked_historical() -> None:
+    docs = (
+        "AUDIT_ARENA_V0.md",
+        "CATHEDRAL_V0_LANES.md",
+        "DISTILLATION_READINESS.md",
+        "LANE2_SECURE_COMPUTE_PLAN.md",
+        "LAUNCH_ANNOUNCEMENT_DRAFT.md",
+        "LAUNCH_MERGE_NOTE.md",
+        "LAUNCH_READINESS_CHECKLIST.md",
+        "LAUNCH_SCORECARD.md",
+        "LAUNCH_V0_RUNBOOK.md",
+        "SOLVER_ATTESTATION_STATUS.md",
+        "TEE_GPU_CAPACITY.md",
+    )
+
+    for name in docs:
+        head = (ROOT / name).read_text("utf-8").split("\n", 9)[:9]
+        assert "> [!WARNING]" in head, name
+        assert any(line.startswith("> **Historical record.**") for line in head), name
+        assert CANONICAL_URL in "\n".join(head), name

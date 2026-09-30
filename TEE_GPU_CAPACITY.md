@@ -1,5 +1,11 @@
 # TEE GPU Capacity Lane
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: publisher-only MVP. Default off. No validator update.
 
 This lane records candidate Intel TDX + NVIDIA confidential-compute GPU capacity

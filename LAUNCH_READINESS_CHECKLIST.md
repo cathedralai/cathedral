@@ -1,5 +1,11 @@
 # Cathedral v0 Launch Readiness Checklist
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: operator handoff for the three-lane v0 work. This is not a launch
 announcement. Treat the current state as a reviewable scaffold unless every
 gate below is satisfied in the target environment.
