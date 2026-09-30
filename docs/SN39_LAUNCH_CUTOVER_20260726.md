@@ -144,6 +144,37 @@ rejects VCS requirements outright, and hash-locking is the entire point of this
 file. So this lock keeps the archive form and accepts that a future rename
 breaks it again — the mitigation is that a rename now has a written checklist.
 
+### Amendment 2: the second rename (cathedral-compute -> cathedral-sandbox)
+
+It happened again. `cathedral-compute` was renamed to `cathedral-sandbox`, so
+the same commit `655c2644...` now unpacks to `cathedral-sandbox-655c2644.../`
+and hashes to `sha256:98f4bf8c43b1e7429d920a9af1f34e61902aaf47d8df427504c43a1a4f46af89`.
+`Two-mode provenance` was red at "Build the hash-locked launch environment"
+again, with the same pip "someone may have tampered with them" message.
+
+Checked before moving the pins: the `cathedral-compute` and `cathedral-sandbox`
+archive URLs serve byte-identical tarballs (both `98f4bf8c...`), and
+`git archive --format=tar --prefix=cathedral-sandbox-655c2644.../ 655c2644... | gzip -cn`
+from a fresh clone reproduces `98f4bf8c...` byte for byte. The new digest is
+exactly the commit's contents under the new directory name.
+
+The same sites as in Amendment 1 moved:
+
+| Site | New value |
+|---|---|
+| `requirements/sn39-reproduction.lock` | URL -> `cathedral-sandbox`, `--hash` -> `98f4bf8c...` |
+| `pyproject.toml` | `provenance` extra URL and `#sha256=` -> `98f4bf8c...` |
+| `scripts/build_sn39_release_manifest.py` | `EXPECTED_CATHEDRAL_URL`, `EXPECTED_CATHEDRAL_ARCHIVE_SHA256` |
+| `scaffold/sn39_public_reproduction.py` | `EXPECTED_RELEASE_PINS["reproduction_dependencies"]` -> `sha256:8a04cced...` |
+| `docs/SN39_MAINNET_RELEASE_20260724.md` | component table's reproduction lock digest |
+
+The full new lock digest is
+`sha256:8a04cced5b5ecdc044e1de5ae8aec889a31e1cd9c012adf69c3075807eac4a20`.
+The build lock digest (`sha256:b212eed1...`) is unchanged.
+
+The re-signing caveat above applies unchanged: a root-signed release manifest
+must be published over these digests before the public reproduction can pass.
+
 ### Host exporter change (NOT applied)
 
 `/usr/local/sbin/cathedral-sn39-export-evidence` currently hardcodes
