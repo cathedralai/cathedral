@@ -125,3 +125,70 @@ def test_filter_mode_without_fresh_snapshot_fails_open_and_marks_status(tmp_path
     assert meta["snapshot_fresh"] is False
     assert meta["status"] == "no_fresh_snapshot"
     assert meta["final_miner_count"] == 2
+
+
+def test_refuse_policy_pays_nobody_without_a_fresh_snapshot(tmp_path, monkeypatch):
+    """Issue #345: with CATHEDRAL_WEIGHTS_PAYABLE_HOTKEYS_STALE=refuse, a dead
+    metagraph poller yields the signed burn fallback, never unfiltered scores."""
+    _common_env(monkeypatch, "filter")
+    monkeypatch.setenv(weights.PAYABLE_HOTKEYS_STALE_ENV, "refuse")
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    store = _store(tmp_path)
+    ran_at = weights._ms_iso(now - timedelta(minutes=1))
+    _add_eval_run(store, "hk-payable", ran_at)
+    _add_eval_run(store, "hk-missing", ran_at)
+    _add_metagraph_hotkey(store, "hk-payable", weights._ms_iso(now - timedelta(hours=1)), uid=7)
+
+    payload = _build(store, now)
+
+    assert payload["weights"] == []
+    meta = payload["policy_metadata"]["payable_hotkeys"]
+    assert meta["status"] == "refused_no_fresh_snapshot"
+    assert meta["stale_policy"] == "refuse"
+    assert meta["enforced"] is True
+    assert meta["snapshot_fresh"] is False
+    assert meta["raw_miner_count"] == 2 and meta["final_miner_count"] == 0
+
+
+def test_refuse_policy_filters_normally_with_a_fresh_snapshot(tmp_path, monkeypatch):
+    _common_env(monkeypatch, "filter")
+    monkeypatch.setenv(weights.PAYABLE_HOTKEYS_STALE_ENV, "refuse")
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    store = _store(tmp_path)
+    ran_at = weights._ms_iso(now - timedelta(minutes=1))
+    _add_eval_run(store, "hk-payable", ran_at)
+    _add_eval_run(store, "hk-missing", ran_at)
+    _add_metagraph_hotkey(store, "hk-payable", weights._ms_iso(now), uid=7)
+
+    payload = _build(store, now)
+
+    assert payload["weights"] == [{"miner_hotkey": "hk-payable", "weight": 1.0}]
+    meta = payload["policy_metadata"]["payable_hotkeys"]
+    assert meta["status"] == "filtered" and "stale_policy" not in meta
+
+
+def test_refuse_policy_leaves_mark_mode_and_the_default_unchanged(tmp_path, monkeypatch):
+    now = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    store = _store(tmp_path)
+    ran_at = weights._ms_iso(now - timedelta(minutes=1))
+    _add_eval_run(store, "hk-a", ran_at)
+    _add_eval_run(store, "hk-b", ran_at)
+
+    # mark never filters, so refuse does not apply to it.
+    _common_env(monkeypatch, "mark")
+    monkeypatch.setenv(weights.PAYABLE_HOTKEYS_STALE_ENV, "refuse")
+    payload = _build(store, now)
+    assert [w["miner_hotkey"] for w in payload["weights"]] == ["hk-a", "hk-b"]
+    assert payload["policy_metadata"]["payable_hotkeys"]["status"] == "no_fresh_snapshot"
+
+    # The default (and any unknown value) is today's fail-open, with no new keys.
+    _common_env(monkeypatch, "filter")
+    for value in (None, "bogus"):
+        if value is None:
+            monkeypatch.delenv(weights.PAYABLE_HOTKEYS_STALE_ENV, raising=False)
+        else:
+            monkeypatch.setenv(weights.PAYABLE_HOTKEYS_STALE_ENV, value)
+        payload = _build(store, now)
+        assert [w["miner_hotkey"] for w in payload["weights"]] == ["hk-a", "hk-b"]
+        meta = payload["policy_metadata"]["payable_hotkeys"]
+        assert meta["status"] == "no_fresh_snapshot" and "stale_policy" not in meta
