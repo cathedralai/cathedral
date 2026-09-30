@@ -1,8 +1,9 @@
 # Cathedral
 
-Cathedral coordinates verified work on Bittensor. The live subnet is SN94: the
-validator moved there from SN39 on 28 September 2026 in
-[cathedral-validator #261](https://github.com/cathedralai/cathedral-validator/pull/261).
+Cathedral coordinates verified work on Bittensor. The validator is moving from
+SN39 to SN94: the move merged on 28 September 2026 in
+[cathedral-validator #261](https://github.com/cathedralai/cathedral-validator/pull/261)
+and reaches validator hosts with the next signed cathedral-validator release.
 This repository keeps mechanism, research, and historical integration code,
 including the retired SN39 validator and weight publisher. It is not the
 validator operator repository.
@@ -53,8 +54,8 @@ The live validator is
 [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator), not
 this repository. It verifies miners' compute itself, derives the whole weight
 vector locally, and writes it directly with each operator's hotkey. Since 31
-August 2026 it has not downloaded a weight vector or used a relay, and since 28
-September 2026 it has run on SN94.
+August 2026 it has not downloaded a weight vector or used a relay. Its move to
+SN94 is merged (28 September 2026) and ships with its next signed release.
 
 The validator and weight publisher in this repository are retired. The
 publisher ([`scaffold/publisher/weights.py`](scaffold/publisher/weights.py),
