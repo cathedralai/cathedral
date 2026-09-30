@@ -49,7 +49,7 @@ EXPECTED_RELEASE_PINS = {
         "sha256:1a60a22de160853d460b22853a426d0534fab4df0fe9f89e5859d60bb4ed3d12"
     ),
     "reproduction_dependencies": (
-        "sha256:765f90428c0fbdb8fc58f03e82edd6dd9ea1cc50bd685dc2bdbbecef30aa1624"
+        "sha256:8a04cced5b5ecdc044e1de5ae8aec889a31e1cd9c012adf69c3075807eac4a20"
     ),
     "reproduction_build_dependencies": (
         "sha256:b212eed198712c8f54ad6250dc64575485bef5c3c311d71ee3c24a2c80396912"
