@@ -83,14 +83,16 @@ def verify_attestation(
     res_hex = hashlib.sha256(res.stdout.encode()).hexdigest()
     hi_ok = rd[32:64] == hashlib.sha256((res.image_digest + res_hex).encode()).digest()
     # the box ran the image Lane B pinned. Pinning is by CONTENT DIGEST (a tag is
-    # mutable): if the miner committed a ref carrying a 64-hex digest it MUST
-    # equal the bound one; a bare tag is accepted and the resolved digest is
-    # recorded (the box must have run some image -> got_hex non-empty).
+    # mutable, so whoever controls it chooses what runs): the committed ref MUST
+    # carry a 64-hex digest equal to the one bound into the quote. A bare tag is
+    # refused.
     import re
     def _hex(s: str) -> str:
-        m = re.search(r"[a-f0-9]{64}", s or "")
-        return m.group(0) if m else ""
+        # Only a trailing sha256:<64 hex> (or @sha256:...) is a pin: hex that
+        # happens to sit in an image name is not.
+        m = re.search(r"(?:^|@)sha256:([a-f0-9]{64})$", (s or "").strip())
+        return m.group(1) if m else ""
     exp_hex, got_hex = _hex(expected_image), _hex(res.image_digest)
-    img_ok = bool(got_hex) and (exp_hex == "" or exp_hex == got_hex)
+    img_ok = bool(got_hex) and bool(exp_hex) and exp_hex == got_hex
     ok = res.intel_verified and lo_ok and hi_ok and img_ok
     return ok, res

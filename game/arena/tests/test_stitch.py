@@ -133,6 +133,7 @@ def test_quote_must_bind_the_specific_solve(tmp_path, monkeypatch):
     import hashlib
     import json
     monkeypatch.setenv("CATHEDRAL_ATTEST_ALLOW_STUB", "1")
+    monkeypatch.setenv("CATHEDRAL_ENV", "test")  # the stub needs an explicit test env
     monkeypatch.delenv("CATHEDRAL_ATTEST_DCAP_VERIFY_CMD", raising=False)
     monkeypatch.delenv("CATHEDRAL_DCAP_VERIFY_CMD", raising=False)
     commitment = stitch.solve_commitment(_RECEIPT())
