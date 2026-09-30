@@ -22,7 +22,7 @@ def test_workflow_produces_real_tool_trace():
 
 
 def test_encode_tool_mints_real_z3_cnf():
-    if not mint.z3_available() or not replay.MINTED_TARGETS:
+    if not mint.can_mint() or not replay.MINTED_TARGETS:
         return
     tc, out = tools.encode_invariant(replay.MINTED_TARGETS[0])
     assert out["z3_minted"] is True
@@ -30,7 +30,7 @@ def test_encode_tool_mints_real_z3_cnf():
 
 
 def test_run_solver_tool_runs_real_cdcl():
-    if not mint.z3_available() or not replay.MINTED_TARGETS:
+    if not mint.can_mint() or not replay.MINTED_TARGETS:
         return
     tc, out = tools.run_solver(replay.MINTED_TARGETS[0])
     if out.get("solver") == "glucose3":

@@ -48,6 +48,7 @@ def test_stub_path_is_labeled(monkeypatch):
     monkeypatch.delenv("CATHEDRAL_ATTEST_DCAP_VERIFY_CMD", raising=False)
     monkeypatch.delenv("CATHEDRAL_DCAP_VERIFY_CMD", raising=False)
     monkeypatch.setenv("CATHEDRAL_ATTEST_ALLOW_STUB", "1")
+    monkeypatch.setenv("CATHEDRAL_ENV", "test")  # the stub needs an explicit test env
     assert attestation.intel_backend() == "stub-intel-collateral"
     v = attestation.verify_real_quote(_quote(), nonce_hex=NONCE, e2e_pubkey_b64=PUBKEY)
     assert v["ok"] is True and v["backend"] == "stub-intel-collateral"

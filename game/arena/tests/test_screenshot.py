@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 
 from game.arena import screenshot as S
+from ._requires import requires_mint
 
 
 def test_screenshot_cmd_encodes_the_working_recipe():
@@ -23,6 +24,7 @@ def test_screenshot_cmd_encodes_the_working_recipe():
     assert any(a.startswith("--user-data-dir=") for a in cmd)
 
 
+@requires_mint
 def test_render_live_html_progresses_a_season(tmp_path):
     html = S.render_live_html(3, out=tmp_path)
     assert html.exists()

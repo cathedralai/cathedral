@@ -5099,6 +5099,37 @@ def build_app(
             headers={"Cache-Control": "no-store", "Access-Control-Allow-Origin": "*"},
         )
 
+    def _composition_health(vec: Any) -> dict[str, Any]:
+        """What shaped the cached vector, read from its signed policy metadata
+        (issue #345): the silent shifts that change who is paid. Never builds."""
+        meta = vec.get("policy_metadata") if isinstance(vec, dict) else None
+        meta = meta if isinstance(meta, dict) else {}
+        payable = meta.get("payable_hotkeys")
+        payable = payable if isinstance(payable, dict) else {}
+        external = meta.get("external_scores")
+        external = external if isinstance(external, dict) else {}
+        collapse = weights_mod.coldkey_collapse_enabled()
+        block = {
+            "vector_present": isinstance(vec, dict),
+            "miner_count": meta.get("miner_count"),
+            "external_scores_enabled": bool(external.get("enabled")),
+            "external_has_scores": bool(external.get("has_scores")),
+            "payable_policy_mode": payable.get("mode"),
+            "payable_policy_status": payable.get("status"),
+            "metagraph_snapshot_fresh": payable.get("snapshot_fresh"),
+            "coldkey_collapse_enabled": collapse,
+            "coldkey_map_loaded": bool(meta.get("coldkey_map_loaded")),
+        }
+        alerts = []
+        if block["external_scores_enabled"] and not block["external_has_scores"]:
+            alerts.append("external_scores_empty")
+        if block["payable_policy_status"] in {"no_fresh_snapshot", "refused_no_fresh_snapshot"}:
+            alerts.append("metagraph_snapshot_stale")
+        if collapse and block["vector_present"] and not block["coldkey_map_loaded"]:
+            alerts.append("coldkey_map_missing")
+        block["alerts"] = alerts
+        return block
+
     @app.get("/v1/admin/validator-health")
     async def validator_health(authorization: str | None = Header(None)):
         """Read-only operator surface: weight-feed freshness + 5xx + submit.
@@ -5141,6 +5172,7 @@ def build_app(
                 "feed_5xx": http_snapshot["weights_feed_5xx"],
                 "feed_rate_5xx": http_snapshot["weights_feed_rate_5xx"],
             },
+            "composition": _composition_health(vec),
             "http_status": http_snapshot,
             "submit": _submit_metrics_snapshot(),
             "pressure": pressure_telemetry.snapshot(),

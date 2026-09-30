@@ -44,7 +44,10 @@ from . import chain, registry, validator
 SHARED_HOTKEY = os.environ.get("TRIPARTITE_HOTKEY", "sim-shared-hk(one-registered-identity)")
 NETUID = int(os.environ.get("TRIPARTITE_NETUID", "39"))
 NETWORK = os.environ.get("TRIPARTITE_NETWORK", "finney")
-PULLABLE_IMAGE = "alpine:3.20"          # a real image so live /v1/attest can pull+run
+# A real image, pinned by content digest (attestation refuses a bare tag), so
+# live /v1/attest can pull and run it: alpine:3.20, linux/amd64 manifest.
+PULLABLE_IMAGE = os.environ.get("TRIPARTITE_IMAGE") or (
+    "alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e")
 
 # 14 workers (1 shared hotkey), honest + exploit, across all 3 lanes
 ROSTER = [
