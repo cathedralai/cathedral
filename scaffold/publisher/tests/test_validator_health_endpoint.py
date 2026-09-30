@@ -129,3 +129,82 @@ def test_unhandled_exception_counts_as_5xx(monkeypatch):
     assert len(after["recent_5xx"]) == len(before["recent_5xx"]) + 1
     assert after["recent_5xx"][-1]["status"] == 500
     assert after["recent_5xx"][-1]["path"] == "/v1/test-only/boom"
+
+
+def _health_with_vector(monkeypatch, client, vec):
+    from scaffold.publisher import weights as weights_mod
+
+    monkeypatch.setattr(weights_mod, "cached_vector", lambda *a, **k: vec)
+    resp = client.get(
+        "/v1/admin/validator-health",
+        headers={"Authorization": f"Bearer {ADMIN_TOKEN}"},
+    )
+    assert resp.status_code == 200
+    return resp.json()["composition"]
+
+
+def test_composition_block_without_a_vector(monkeypatch, client):
+    monkeypatch.setenv("CATHEDRAL_WEIGHTS_COLDKEY_COLLAPSE", "1")
+    block = _health_with_vector(monkeypatch, client, None)  # a cold process: nothing cached
+    assert block["vector_present"] is False and block["alerts"] == []
+
+
+def test_composition_block_flags_the_silent_shifts_of_issue_345(monkeypatch, client):
+    monkeypatch.setenv("CATHEDRAL_WEIGHTS_COLDKEY_COLLAPSE", "1")
+    vec = {
+        "generated_at": "2026-01-01T00:00:00.000Z",
+        "policy_metadata": {
+            "miner_count": 12,
+            "coldkey_map_loaded": False,
+            "external_scores": {"enabled": True, "has_scores": False},
+            "payable_hotkeys": {
+                "mode": "filter",
+                "status": "no_fresh_snapshot",
+                "snapshot_fresh": False,
+            },
+        },
+    }
+    block = _health_with_vector(monkeypatch, client, vec)
+    assert block["miner_count"] == 12
+    assert block["payable_policy_status"] == "no_fresh_snapshot"
+    assert block["metagraph_snapshot_fresh"] is False
+    assert block["alerts"] == ["external_scores_empty", "metagraph_snapshot_stale", "coldkey_map_missing"]
+
+
+def test_composition_block_is_quiet_when_healthy(monkeypatch, client):
+    monkeypatch.delenv("CATHEDRAL_WEIGHTS_COLDKEY_COLLAPSE", raising=False)
+    vec = {
+        "generated_at": "2026-01-01T00:00:00.000Z",
+        "policy_metadata": {
+            "miner_count": 5,
+            "coldkey_map_loaded": False,
+            "external_scores": {"enabled": True, "has_scores": True},
+            "payable_hotkeys": {"mode": "filter", "status": "all_payable", "snapshot_fresh": True},
+        },
+    }
+    block = _health_with_vector(monkeypatch, client, vec)
+    assert block["external_has_scores"] is True and block["alerts"] == []
+
+
+def test_composition_block_reads_a_real_vector(monkeypatch, client, tmp_path):
+    """Keys come from build_signed_vector's own metadata: a payable filter with no
+    metagraph snapshot (an empty store) shows up as stale."""
+    from scaffold.publisher import weights as weights_mod
+    from scaffold.publisher.store import Store
+
+    monkeypatch.setenv("CATHEDRAL_WEIGHTS_PAYABLE_HOTKEYS", "filter")
+    vec = weights_mod.build_signed_vector(
+        Store(str(tmp_path / "publisher.sqlite")), signing_key_hex="11" * 32
+    )
+    block = _health_with_vector(monkeypatch, client, vec)
+    assert block["vector_present"] is True
+    assert block["payable_policy_mode"] == "filter"
+    assert block["payable_policy_status"] == "no_fresh_snapshot"
+    assert block["metagraph_snapshot_fresh"] is False
+    assert "metagraph_snapshot_stale" in block["alerts"]
+
+
+def test_composition_block_tolerates_malformed_metadata(monkeypatch, client):
+    vec = {"policy_metadata": {"payable_hotkeys": "junk", "external_scores": ["junk"]}}
+    block = _health_with_vector(monkeypatch, client, vec)
+    assert block["payable_policy_status"] is None and block["alerts"] == []

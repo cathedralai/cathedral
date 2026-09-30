@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from game.arena.engine import ArenaEngine, _real_audit_vault
 from game.arena.ui import render
+from ._requires import requires_mint
 
 
 def test_vault_pure_builder_classifies_verdicts():
@@ -37,6 +38,7 @@ def test_vault_graceful_when_no_real_receipts():
     assert vault == []
 
 
+@requires_mint
 def test_vault_present_in_engine_and_ui():
     r = ArenaEngine().run(1)
     assert isinstance(r.real_audit_vault, list)

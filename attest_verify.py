@@ -137,6 +137,9 @@ def main() -> None:
             assert no_verifier.ok is False
             assert no_verifier.reason == "no_verifier_configured"
             os.environ["CATHEDRAL_ATTEST_ALLOW_STUB"] = "1"
+            # The stub needs an explicit dev/test environment: unset never gets it.
+            assert attest_mod.configured_intel_verifier() is None
+            os.environ["CATHEDRAL_ENV"] = "test"
             assert isinstance(attest_mod.configured_intel_verifier(), attest_mod.StubIntelVerifier)
             os.environ["CATHEDRAL_ENV"] = "production"
             assert attest_mod.configured_intel_verifier() is None
