@@ -19,7 +19,7 @@ def test_decode_assignment_is_pure_bit_math():
 
 
 def test_mint_emits_a_real_decode_map():
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     mm = mint.mint_with_decode_map("B2-fee-silent-zero", 8, "realistic")
     assert mm is not None and mm["result"] == "sat"
@@ -33,7 +33,7 @@ def test_mint_emits_a_real_decode_map():
 def test_external_solver_assignment_decodes_without_z3():
     """The whole point: solve the minted CNF with Glucose (NOT z3), decode its
     assignment via the map, and the decoded input reproduces the real violation."""
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     mm = mint.mint_with_decode_map("B2-fee-silent-zero", 8, "realistic")
     solved = mint.solve_minted_cnf(mm["cnf_text"])
@@ -55,7 +55,7 @@ def test_external_solver_assignment_decodes_without_z3():
 
 
 def test_external_decode_status_chain_ok():
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     st = mint.external_decode_status()
     if not st["available"]:

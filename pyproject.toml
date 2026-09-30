@@ -28,6 +28,8 @@ publisher = [
 ]
 test = [
     "pytest>=8",
+    # game/arena/tests/test_packaging.py builds the wheel's file list with it.
+    "setuptools>=68",
     # Ruff 0.16 expands the default rule set against the pre-existing thin
     # subnet tree. Keep required CI reproducible at the reviewed baseline until
     # that separate migration is performed deliberately.

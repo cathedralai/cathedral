@@ -348,7 +348,7 @@ def test_offbox_generalizes_to_multiple_minted_rules(monkeypatch):
     via the rigorous cnf_satisfied check and runs that RULE'S OWN harness for the
     secondary check. Driven with real Glucose assignments for B2 AND I1 (no Stitch)."""
     from game.arena import mint, replay
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     try:
         from pysat.formula import CNF
@@ -380,7 +380,7 @@ def test_offbox_hardened_cross_confirms_unsat(monkeypatch):
     confirmed UNSAT by kissat on Stitch AND by a local CDCL solver. ok = both agree.
     Driven without Stitch by mocking the remote UNSAT confirmation."""
     from game.arena import mint
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     # A4 conservation mints a real, non-trivial UNSAT CNF; local CDCL must confirm.
     m = mint.mint_invariant("A4-fee-split-conservation", 16, "realistic", "subtensor-amm")
@@ -438,7 +438,7 @@ def test_offbox_hardened_generalizes_to_the_root_model(monkeypatch):
     direct contradiction, so the mint+CDCL is instant). Mocks the remote UNSAT confirm.
     (The root invariants are z3 'unknown' at the old hardcoded width 16 — width matters.)"""
     from game.arena import mint
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     m = mint.mint_invariant("A1-deposit-no-dilution", 8, "realistic", "subtensor-root-reborn")
     if not m or m["result"] != "unsat":
@@ -465,7 +465,7 @@ def test_offbox_hardened_degrades_gracefully(monkeypatch):
     monkeypatch.setattr(stitch, "_tcp_reachable", lambda *a, **k: False)
     r = mint.offbox_hardened_on_stitch("A4-fee-split-conservation")
     assert "available" in r
-    if not r["available"] and mint.z3_available():
+    if not r["available"] and mint.can_mint():
         assert r["reason"] == "stitch_unreachable"
         assert r.get("local_unsat") is True            # local CDCL still cross-checks UNSAT
     stitch.stitch_available.cache_clear()
@@ -729,7 +729,7 @@ def test_offbox_on_stitch_ok_rests_on_cnf_satisfaction(monkeypatch):
     z3, solver/model-independent), NOT the precision-scoped U64F64 harness replay.
     Driven with a real Glucose assignment so it's deterministic without Stitch."""
     from game.arena import mint, stitch
-    if not mint.z3_available():
+    if not mint.can_mint():
         return
     mm = mint.mint_with_decode_map("B2-fee-silent-zero", 8, "realistic")
     if not mm or mm["result"] != "sat":
