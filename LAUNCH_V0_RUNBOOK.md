@@ -1,5 +1,11 @@
 # Cathedral v0 Launch Runbook
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: launch-candidate runbook for the current three-lane scaffold. This is
 the operator path to a controlled launch, not permission to ask miners broadly
 to buy hardware.

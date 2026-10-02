@@ -1,7 +1,11 @@
 # Cathedral
 
-Cathedral coordinates verified work for Bittensor SN39. This repository keeps
-mechanism, publisher, research, and historical integration code. It is not the
+Cathedral coordinates verified work on Bittensor. The validator is moving from
+SN39 to SN94: the move merged on 28 September 2026 in
+[cathedral-validator #261](https://github.com/cathedralai/cathedral-validator/pull/261)
+and reaches validator hosts with the next signed cathedral-validator release.
+This repository keeps mechanism, research, and historical integration code,
+including the retired SN39 validator and weight publisher. It is not the
 validator operator repository.
 
 ## Choose your path
@@ -44,12 +48,32 @@ canonical operator guide.
 Registration, uptime, hardware ownership, attestation, or self-reported volume
 never earns weight on its own. Evidence must pass the active validator policy.
 
+## What runs in production
+
+The live validator is
+[`cathedral-validator`](https://github.com/cathedralai/cathedral-validator), not
+this repository. It verifies miners' compute itself, derives the whole weight
+vector locally, and writes it directly with each operator's hotkey. Since 31
+August 2026 it has not downloaded a weight vector or used a relay. Its move to
+SN94 is merged (28 September 2026) and ships with its next signed release.
+
+The validator and weight publisher in this repository are retired. The
+publisher ([`scaffold/publisher/weights.py`](scaffold/publisher/weights.py),
+served at `GET /v1/validator/weights/next`) signed the vector that relay
+validators used to fetch and set. The supported validator no longer reads any
+signed vector, and cathedral-validator marks its own publisher deployment, the
+SN94 origin-scorer unit, as retired. A change to `scaffold/publisher` does not
+change the weights the supported validator sets.
+
 ## What remains here
 
-- publisher and mechanism code used to form signed evidence and candidates;
+- the retired weight publisher and SN39 validator (above), kept for mechanism
+  tests and migration review, and mechanism code used to form signed evidence
+  and candidates;
 - SAT, VerifyML, Violet, arena, and agent-policy experiments;
 - miner and contributor tools;
-- historical launch records and migration fixtures; and
+- historical launch records and migration fixtures, including the top-level
+  v0 launch documents, each marked historical; and
 - local tests for those retained contracts.
 
 A local test, receipt, endpoint, or historical chain row does not prove a lane

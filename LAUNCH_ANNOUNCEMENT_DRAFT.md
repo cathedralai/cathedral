@@ -1,5 +1,11 @@
 # Cathedral Launch Announcement Draft
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 ## Discord-Ready Announcement
 
 Cathedral was never meant to be only a random SAT board.

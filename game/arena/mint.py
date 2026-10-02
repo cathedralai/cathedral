@@ -15,8 +15,11 @@ from __future__ import annotations
 
 import functools
 import hashlib
+from pathlib import Path
 
-_FACTORY = "/mnt/c/Users/fred/code/audit-hunter/factory"
+# The z3 factory lives in the sibling audit-hunter checkout, the same one corpus.py
+# reads. Without it (or without z3) minting is a no-op.
+_FACTORY = str(Path(__file__).resolve().parents[3] / "audit-hunter" / "factory")
 
 
 _MODELS = {
@@ -33,6 +36,8 @@ def mint_invariant(rule_id: str = "B2-fee-silent-zero", width: int = 16,
     {witness, decode_inputs, invariant, cnf_sha256, vars, clauses, result, ...} or
     None if z3/the model is absent."""
     import sys
+    if not Path(_FACTORY).is_dir():
+        return None                     # never import an unrelated "core" from elsewhere
     if _FACTORY not in sys.path:
         sys.path[:0] = [_FACTORY, _FACTORY + "/models"]
     modspec = _MODELS.get(model)
@@ -88,6 +93,8 @@ def mint_with_decode_map(rule_id: str = "B2-fee-silent-zero", width: int = 8,
     Returns {cnf_text, decode_map:{name:{bit:var}}, result, z3_witness, vars,
     clauses, cnf_sha256} or None if z3/model absent."""
     import sys
+    if not Path(_FACTORY).is_dir():
+        return None                     # never import an unrelated "core" from elsewhere
     if _FACTORY not in sys.path:
         sys.path[:0] = [_FACTORY, _FACTORY + "/models"]
     modspec = _MODELS.get(model)
@@ -370,3 +377,8 @@ def z3_available() -> bool:
         return True
     except Exception:
         return False
+
+
+def can_mint() -> bool:
+    """Whether minting can run here: z3 importable and the audit-hunter factory present."""
+    return z3_available() and Path(_FACTORY).is_dir()

@@ -71,6 +71,82 @@ def test_legacy_runtime_refuses_direct_sn39_submission() -> None:
     assert calls == []
 
 
+FINNEY_GENESIS = "0x2f0555cc76fc2840a25a6ea3b9637146806f1f44b090c175ffde2a7e5ab36c03"
+TESTNET_GENESIS = "0x" + "ab" * 32
+
+
+@pytest.mark.parametrize(
+    "network",
+    [
+        "finney",
+        "Finney",
+        "archive",
+        "wss://entrypoint-finney.opentensor.ai:443",
+        "wss://self-hosted-finney.example",
+    ],
+)
+@pytest.mark.parametrize("netuid", ["94", "1"])
+def test_legacy_sat_validator_refuses_finney_broadcast_on_any_netuid(
+    network: str, netuid: str
+) -> None:
+    args = validator_module.build_parser().parse_args(
+        ["--network", network, "--netuid", netuid, "--broadcast"]
+    )
+    with pytest.raises(SystemExit, match="cannot broadcast on Finney"):
+        validator_module.validate_args(args)
+    with pytest.raises(ThinSubnetError, match="disabled on Finney"):
+        asyncio.run(validator_module.async_main(args))
+
+
+@pytest.mark.parametrize("network", ["finney", "wss://self-hosted-finney.example"])
+def test_legacy_sat_validator_dry_run_is_still_allowed_on_finney(
+    network: str,
+) -> None:
+    args = validator_module.build_parser().parse_args(
+        ["--network", network, "--netuid", "94"]
+    )
+    validator_module.validate_args(args)
+
+
+@pytest.mark.parametrize("network", ["local", "test"])
+def test_legacy_sat_validator_allows_non_mainnet_broadcast(network: str) -> None:
+    args = validator_module.build_parser().parse_args(
+        ["--network", network, "--netuid", "94", "--broadcast"]
+    )
+    validator_module.validate_args(args)
+
+
+@pytest.mark.parametrize(
+    "genesis", [FINNEY_GENESIS, FINNEY_GENESIS.upper(), None, "0x12", OSError("rpc")]
+)
+def test_legacy_runtime_refuses_submission_to_a_finney_or_unknown_chain(
+    genesis: object,
+) -> None:
+    calls: list[dict] = []
+
+    def get_block_hash(block):
+        assert block == 0
+        if isinstance(genesis, Exception):
+            raise genesis
+        return genesis
+
+    runtime = BittensorRuntime(
+        wallet=object(),
+        subtensor=SimpleNamespace(
+            substrate=SimpleNamespace(get_block_hash=get_block_hash),
+            set_weights=lambda **kwargs: calls.append(kwargs),
+        ),
+        dendrite=object(),
+        netuid=94,
+        mev_protection=False,
+        commit_reveal_version=4,
+    )
+    pending = SimpleNamespace(uids=[1], weights=[1.0])
+    with pytest.raises(ThinSubnetError, match="disabled on Finney"):
+        asyncio.run(runtime.submit_weights(pending))
+    assert calls == []
+
+
 def test_legacy_sat_validator_defaults_to_non_mainnet_dry_run(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -992,6 +1068,8 @@ def test_bittensor_adapter_passes_commit_reveal_compatibility_flags():
     calls = []
 
     class FakeSubtensor:
+        substrate = SimpleNamespace(get_block_hash=lambda _block: TESTNET_GENESIS)
+
         def set_weights(
             self,
             wallet,

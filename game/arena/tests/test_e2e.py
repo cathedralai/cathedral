@@ -13,6 +13,7 @@ from game.arena import mint as _mint
 from game.arena.engine import ArenaEngine
 from game.reward import verify_vector
 from game.arena.ui import render
+from ._requires import requires_audit_hunter
 
 CHEAT_GATE = {
     "copier": "witness_verifies", "fake_attest": "attestation_valid",
@@ -37,6 +38,7 @@ def game():
     return ArenaEngine().run(1)
 
 
+@requires_audit_hunter
 def test_corpus_is_real(game):
     cs = game.corpus_summary
     assert cs["audit_hunter_present"] and cs["targets"] == 17 and cs["proof_tasks"] >= 28
@@ -85,7 +87,7 @@ def test_sybil_collapse_and_solver_bench(game):
 
 
 def test_unified_minted_proof_if_z3(game):
-    if not _mint.z3_available():
+    if not _mint.can_mint():
         return
     mp = game.operator_console["minted_proof"]
     if mp.get("available") and mp["external_solve"].get("available"):

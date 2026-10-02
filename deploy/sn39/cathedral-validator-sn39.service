@@ -36,6 +36,9 @@ ExecStartPre=/bin/sh -c '! systemctl is-active --quiet cathedral-confidential-va
 ExecStart=/usr/bin/python3.12 -I -E -s /usr/local/libexec/cathedral-sn39-release continuous
 Restart=on-failure
 RestartSec=15s
+# scaffold.cli exits 2 when it refuses a Finney broadcast from this repository;
+# a refusal will not clear by restarting, so do not restart-loop on it.
+RestartPreventExitStatus=2
 TimeoutStopSec=30s
 StateDirectory=cathedral-validator
 StateDirectoryMode=0700

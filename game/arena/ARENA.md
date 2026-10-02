@@ -15,6 +15,7 @@ artifacts.
 
 ```bash
 python -m game.arena.serve                 # LIVE server → http://127.0.0.1:8800 (ticks a fresh round on refresh)
+CATHEDRAL_ARENA_HOST=0.0.0.0 python -m game.arena.serve   # every interface, e.g. a Windows browser into WSL
 cathedral-arena-serve 8800                 # same after editable install
 python -m game.arena --season 3            # snapshot: 3-round season → out/arena.html + reports
 python -m game.arena --shot                # report screenshot + playable /game screenshot manifests
