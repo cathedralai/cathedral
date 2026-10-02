@@ -1,5 +1,11 @@
 # Lane 2: Secure Compute Supply
 
+> [!WARNING]
+> **Historical record.** This describes the v0 launch scaffold as of June 2026. It
+> is not current operating guidance. Validators: use
+> [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator). What
+> runs today: see the [README](README.md).
+
 Status: plan from prior Polaris solver-attestation work plus the current
 `tee_gpu` publisher lane. This is the launch path for:
 

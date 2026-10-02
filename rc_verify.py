@@ -29,10 +29,10 @@ ck("attested solve >= non-attested floor", r1.weighted_score>=r2.weighted_score 
 ck("attesting earns strictly more here", r1.weighted_score>r2.weighted_score)
 ck("timeout fraud blocked", B.score(pb,B.validate_submission(pb,hb,H._submission(("B-fraud-4","solver_docker_v1","timeout_fraud"),pb))).weighted_score==0)
 from scaffold.verify import verify_attestation, attested_elapsed_ms
-from scaffold.polaris import PolarisClient
+from scaffold.polaris import PolarisClient, offline_pinned_ref
 import os,base64,hashlib,dataclasses
 pc=PolarisClient(live=False); nn=os.urandom(8).hex(); pk=base64.b64encode(os.urandom(32)).decode()
-ok,res=verify_attestation(pc,nonce=nn,pubkey_b64=pk,expected_image="img:s",workload="solve",measured_elapsed_ms=300)
+ok,res=verify_attestation(pc,nonce=nn,pubkey_b64=pk,expected_image=offline_pinned_ref("img:s"),workload="solve",measured_elapsed_ms=300)
 tam=dataclasses.replace(res,stdout=res.stdout.replace("elapsed_ms=300","elapsed_ms=1"))
 rh=hashlib.sha256(tam.stdout.encode()).hexdigest()
 ck("attested elapsed tamper-evident", ok and tam.report_data[32:64]!=hashlib.sha256((tam.image_digest+rh).encode()).digest())
@@ -200,3 +200,4 @@ ck("UID present in only one regime diffed against 0", any(r.uid==2 and r.diff==1
 ck("threshold boundaries exact", shadow.band_for(0.10)=="blocker" and shadow.band_for(0.01)=="investigate" and shadow.band_for(0.0099)=="ok")
 
 print("\nRC GATE:", "PASS ✅ all %d checks"%len(checks) if all(c for _,c in checks) else "FAIL ❌ "+str([n for n,c in checks if not c]))
+sys.exit(0 if all(c for _,c in checks) else 1)  # CI runs this: a failed gate must fail the job

@@ -1,8 +1,9 @@
 """Lane B — solver-Docker submission, run ATTESTED.
 
-Miners submit a solver as a Docker image; it runs in an attested TDX box. The
-image digest IS the MRTD (pinned + precomputable — the Entrius pattern): a
-matching MRTD in the quote proves *that exact image* produced the result.
+Miners submit a solver as a Docker image, pinned by content digest; it runs in
+an attested TDX box. The MRTD measures the base VM, not the image, so image
+identity rides on the quote's report_data, which binds the image digest and the
+run's output (scaffold.verify.verify_attestation).
 
 Grading is the shared three-outcome:
   * SAT     -> witness self-verifies (verify_witness). NO attestation needed.

@@ -15,8 +15,10 @@ from game.arena.replay_differential import (
     _differential_for,
     differential_report,
 )
+from ._requires import requires_audit_lane_or_mint
 
 
+@requires_audit_lane_or_mint
 def test_every_registered_target_is_a_real_discriminator():
     rep = differential_report()
     assert rep["total"] >= 4

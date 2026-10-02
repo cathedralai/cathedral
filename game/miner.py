@@ -13,6 +13,8 @@ import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from scaffold.polaris import offline_pinned_ref
+
 WORKERS_DIR = Path(__file__).resolve().parent / "_workers"
 
 
@@ -54,7 +56,9 @@ class MinerEnv:
 
 def _slot(image: str, has_key: bool) -> ComputeSlot:
     key = base64.b64encode(hashlib.sha256(image.encode()).digest()).decode() if has_key else ""
-    return ComputeSlot(image=image, pubkey_b64=key)
+    # Attestation only accepts digest-pinned images; "unattestable" stays a bare tag.
+    ref = image if "unattestable" in image else offline_pinned_ref(image)
+    return ComputeSlot(image=ref, pubkey_b64=key)
 
 
 def default_roster() -> list[MinerEnv]:
