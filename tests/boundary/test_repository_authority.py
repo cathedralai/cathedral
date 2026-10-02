@@ -100,3 +100,12 @@ def test_top_level_v0_launch_docs_are_marked_historical() -> None:
         assert "> [!WARNING]" in head, name
         assert any(line.startswith("> **Historical record.**") for line in head), name
         assert CANONICAL_URL in "\n".join(head), name
+
+
+def test_system_map_does_not_present_the_retired_publisher_as_current() -> None:
+    text = (ROOT / "README.md").read_text("utf-8")
+    system_map = text.split("## How the system fits together", 1)[1].split("## ", 1)[0]
+    assert "supported direct-validator source" in system_map
+    assert "not an input to the supported direct validator" in system_map
+    assert "It derives its own weight vector" in system_map
+    assert "https://github.com/cathedralai/cathedral-sandbox" in text

@@ -13,7 +13,7 @@ validator operator repository.
 | Goal | Repository |
 |---|---|
 | Run, audit, or release a validator | [`cathedral-validator`](https://github.com/cathedralai/cathedral-validator) |
-| Provide Intel TDX CPU compute | [`cathedral-compute`](https://github.com/cathedralai/cathedral-compute) |
+| Provide Intel TDX CPU compute | [`cathedral-sandbox`](https://github.com/cathedralai/cathedral-sandbox) |
 | Compete in the Distill track | [`cathedral-distill`](https://github.com/cathedralai/cathedral-distill) |
 | Test the shared command surface | [`cathedral-cli`](https://github.com/cathedralai/cathedral-cli), early beta |
 | Use Cathedral Computer | [Product and API documentation](https://cathedral.computer/docs/) |
@@ -36,14 +36,19 @@ canonical operator guide.
 
 ## How the system fits together
 
-1. Compute and Distill define admissible work and evidence.
-2. Miners perform work and submit evidence for a mechanism.
-3. Publisher and mechanism code turn admitted evidence into a signed
-   candidate.
-4. The canonical validator independently checks the candidate, maps hotkeys to
-   current UIDs, applies owner-controlled allocation and burn policy, and
-   either refuses or produces one reviewed vector.
-5. Only the validator wallet is able to broadcast weights.
+The supported direct-validator source follows this path:
+
+1. The validator reads a finalized metagraph to discover serving miners.
+2. It authenticates to miners and requests their machine fleets.
+3. It verifies confidential-computing evidence and the SAT workload, then
+   removes repeated machine identities.
+4. It derives its own weight vector and submits it with the operator's hotkey,
+   checking finalized chain history for the exact result.
+
+The retired publisher's signed-candidate path remains here for mechanism and
+migration tests. It is not an input to the supported direct validator. Distill
+experiments in this repository are not proof that a current validator rewards
+that lane. The canonical validator's reviewed release defines active policy.
 
 Registration, uptime, hardware ownership, attestation, or self-reported volume
 never earns weight on its own. Evidence must pass the active validator policy.
