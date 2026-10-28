@@ -62,12 +62,27 @@ Quoted terms are in the pull request description.
 
 ## CPU benchmark on this cloud VM
 
-Numbers from `python scripts/lfm3_cpu_benchmark.py`. They are not sealed-host
+Numbers from `python scripts/lfm3_cpu_benchmark.py` and `llama-bench` on the
+cloud agent VM (4 vCPU Intel Xeon, 15 GiB RAM). They are not sealed-host
 numbers. The live sealed run waits for spend approval.
+
+| Measurement | Value |
+|---|---|
+| GGUF on disk | 1,099,627,808 bytes (1.02 GiB) |
+| One prompt ("Reply with the single word pong.") | answer `PONG` |
+| Process start to first token | 4.94 s (load plus prefill) |
+| Generation | 21.5 tokens/s |
+| Prompt processing (same run) | 105.1 tokens/s |
+| llama-bench pp32 | 279.18 tokens/s |
+| llama-bench tg32 | 21.45 tokens/s |
+| Suggested sandbox memory | 4 GiB |
+| Estimated image size | about 1.2 GiB (debian-slim + llama.cpp + GGUF). Image is not built or published. |
 
 ```bash
 python scripts/lfm3_cpu_benchmark.py --report docs/evidence/lfm3-1.7b-cpu-benchmark.json
 ```
+
+Raw JSON: `docs/evidence/lfm3-1.7b-cpu-benchmark.json`.
 
 ## Sealed test (paid, opt-in)
 
@@ -79,7 +94,7 @@ gate is set. It does not run in CI.
 export CATHEDRAL_SEALED_LFM3_TEST=1
 export CATHEDRAL_API_KEY=...
 export CATHEDRAL_SSH_PUBLIC_KEY="$(cat ~/.ssh/id_ed25519.pub)"
-pytest -q tests/sandbox_models/test_sealed_lfm3.py
+pytest -q tests/thin/test_sandbox_models.py -k live_sealed
 ```
 
 Do not point a funded key at production until Fred approves the spend.

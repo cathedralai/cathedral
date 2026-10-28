@@ -103,6 +103,7 @@ llama_model_loader: loaded meta data with 42 key-value pairs
 llama_perf_context_print:        load time =    1842.10 ms
 llama_perf_context_print: prompt eval time =     210.00 ms /    12 tokens
 llama_perf_context_print:        eval time =    1600.00 ms /    32 tokens
+[ Prompt: 81.5 t/s | Generation: 18.5 t/s ]
 """
     timings = parse_llama_timings(stderr)
     assert timings["load_ms"] == 1842.10
@@ -110,6 +111,8 @@ llama_perf_context_print:        eval time =    1600.00 ms /    32 tokens
     assert timings["prompt_tokens"] == 12
     assert timings["eval_ms"] == 1600.00
     assert timings["eval_tokens"] == 32
+    assert timings["prompt_tps"] == 81.5
+    assert timings["generation_tps"] == 18.5
 
 
 def test_sealed_probe_skips_without_explicit_enable(monkeypatch: MonkeyPatch) -> None:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import tarfile
@@ -11,6 +12,10 @@ import time
 import urllib.request
 from pathlib import Path
 from typing import Mapping
+
+PROMPT_GEN_RE = re.compile(
+    r"Prompt:\s*([0-9.]+)\s*t/s\s*\|\s*Generation:\s*([0-9.]+)\s*t/s"
+)
 
 
 LLAMA_CPP_TAG = "b11938"
@@ -99,8 +104,10 @@ def run_benchmark(
         "50",
         "--repeat-penalty",
         "1.1",
-        "-no-cnv",
+        "-st",
         "--no-display-prompt",
+        "--reasoning",
+        "off",
     ]
     started = time.monotonic()
     first_token_at: float | None = None
@@ -131,14 +138,15 @@ def run_benchmark(
     finished = time.monotonic()
     if proc.returncode != 0:
         raise RuntimeError(f"llama-cli failed ({proc.returncode}): {stderr[-2000:]}")
-    timings = parse_llama_timings(stderr)
-    generated = "".join(chunks).strip()
+    combined = "".join(chunks) + "\n" + stderr
+    timings = parse_llama_timings(combined)
+    generated = _generated_text("".join(chunks), prompt)
     tokens = int(timings.get("eval_tokens") or 0)
     eval_ms = float(timings.get("eval_ms") or 0)
-    tokens_per_second = None
-    if tokens and eval_ms:
+    tokens_per_second = timings.get("generation_tps")
+    if tokens_per_second is None and tokens and eval_ms:
         tokens_per_second = tokens / (eval_ms / 1000.0)
-    elif tokens and first_token_at is not None:
+    elif tokens_per_second is None and tokens and first_token_at is not None:
         tokens_per_second = tokens / max(finished - first_token_at, 1e-6)
     return {
         "host": "cloud_vm_not_sealed",
@@ -171,6 +179,10 @@ def run_benchmark(
 def parse_llama_timings(stderr: str) -> dict[str, float]:
     timings: dict[str, float] = {}
     for line in stderr.splitlines():
+        match = PROMPT_GEN_RE.search(line)
+        if match:
+            timings["prompt_tps"] = float(match.group(1))
+            timings["generation_tps"] = float(match.group(2))
         if "load time" in line and "=" in line:
             timings["load_ms"] = _ms(line)
         elif "prompt eval time" in line and "=" in line:
@@ -180,6 +192,20 @@ def parse_llama_timings(stderr: str) -> dict[str, float]:
             timings["eval_ms"] = _ms(line)
             timings["eval_tokens"] = _tokens(line)
     return timings
+
+
+def _generated_text(stdout: str, prompt: str) -> str:
+    marker = f"> {prompt}"
+    if marker in stdout:
+        after = stdout.split(marker, 1)[1]
+        cleaned = []
+        for line in after.splitlines():
+            text = line.strip()
+            if not text or text.startswith("[ Prompt:") or text.startswith("Exiting"):
+                continue
+            cleaned.append(text)
+        return "\n".join(cleaned).strip()
+    return stdout.strip()
 
 
 def _ms(line: str) -> float:
