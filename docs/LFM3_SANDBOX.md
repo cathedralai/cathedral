@@ -1,8 +1,9 @@
 # LFM3 suite sandbox model options
 
-This is not live. The catalog and images live in this repository. The hotel
-broker in cathedral-sandbox and the private service layer must consume the
-same template names before a customer can pick them.
+LFM3 1.7B standard image is published on GHCR. Other suite images and sealed
+hotels stay pending (sealed pull timeout on New Cherry). The hotel broker in
+cathedral-sandbox and the private service layer must consume the same template
+names and image refs before a customer can pick them.
 
 Subnet copy in this document is SN94.
 
@@ -16,9 +17,9 @@ including the $10,000,000 annual revenue cap.
 `LiquidAI/LFM3-1.7B-Base-GGUF` is not published (Hugging Face 401). That
 format is listed as not available and is skipped.
 
-| Template | HF (BF16) | GGUF | File used | Bytes | Runtime | Sandbox in | Sandbox out | GPU | Memory | Image (not published) |
+| Template | HF (BF16) | GGUF | File used | Bytes | Runtime | Sandbox in | Sandbox out | GPU | Memory | Image |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `lfm3-1.7b` | [LiquidAI/LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B) | [LFM3-1.7B-GGUF](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF) | `LFM3-1.7B-Q4_K_M.gguf` | 1,099,627,808 | llama.cpp `b11938` (also vLLM and Transformers on BF16/GPU) | text | text | No | 4 GiB | `cathedral/lfm3-1.7b:q4_k_m` |
+| `lfm3-1.7b` | [LiquidAI/LFM3-1.7B](https://huggingface.co/LiquidAI/LFM3-1.7B) | [LFM3-1.7B-GGUF](https://huggingface.co/LiquidAI/LFM3-1.7B-GGUF) | `LFM3-1.7B-Q4_K_M.gguf` | 1,099,627,808 | llama.cpp `b11938` (also vLLM and Transformers on BF16/GPU) | text | text | No | 4 GiB | `ghcr.io/cathedralai/room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761` |
 | `lfm3-1.7b-base` | [LiquidAI/LFM3-1.7B-Base](https://huggingface.co/LiquidAI/LFM3-1.7B-Base) | not published | `model.safetensors` | 3,457,635,448 | Transformers (vLLM can serve BF16 on GPU) | text | text | No | 8 GiB (BF16 needs extra RAM) | `cathedral/lfm3-1.7b-base:bf16` |
 | `lfm3-vl-2b` | [LiquidAI/LFM3-VL-2B](https://huggingface.co/LiquidAI/LFM3-VL-2B) | [LFM3-VL-2B-GGUF](https://huggingface.co/LiquidAI/LFM3-VL-2B-GGUF) | `LFM3-VL-2B-Q4_K_M.gguf` plus `mmproj-LFM3-VL-2B-Q8_0.gguf` | 1,099,627,808 + 203,031,872 | llama.cpp `b11938` (Transformers; vLLM on GPU is in progress) | text, image | text | No | 6 GiB | `cathedral/lfm3-vl-2b:q4_k_m` |
 | `lfm3-audio-2b` | [LiquidAI/LFM3-Audio-2B](https://huggingface.co/LiquidAI/LFM3-Audio-2B) | [LFM3-Audio-2B-GGUF](https://huggingface.co/LiquidAI/LFM3-Audio-2B-GGUF) | `LFM3-Audio-2B-Q4_K_M.gguf` plus `mmproj-LFM3-Audio-2B-Q8_0.gguf` | 1,099,626,016 + 337,862,080 | llama.cpp `b11941` (also Transformers) | text, audio | text, speech | No | 6 GiB | `cathedral/lfm3-audio-2b:q4_k_m` |
