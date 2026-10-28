@@ -51,7 +51,13 @@ def main() -> int:
                 report = run_benchmark(cache_dir=args.cache_dir, model_id=model.id)
             else:
                 report = _run_transformers(model.id, args.cache_dir)
-        except (RuntimeError, OSError, ValueError, FileNotFoundError) as exc:
+        except (
+            RuntimeError,
+            OSError,
+            ValueError,
+            FileNotFoundError,
+            ImportError,
+        ) as exc:
             report = skipped_report(model, f"{type(exc).__name__}: {exc}")
             report["traceback"] = traceback.format_exc()[-4000:]
         write_report(report, path)

@@ -265,6 +265,7 @@ def _run_llama_cli(
     env: dict[str, str],
     extra_args: tuple[str, ...] = (),
     extra_media: tuple[str, ...] = (),
+    single_turn: bool = True,
 ) -> dict[str, object]:
     command = [
         str(cli),
@@ -280,63 +281,48 @@ def _run_llama_cli(
         "50",
         "--repeat-penalty",
         "1.1",
-        "-st",
-        "--no-display-prompt",
         *extra_args,
         *extra_media,
     ]
+    if single_turn:
+        command.extend(["-st", "--no-display-prompt"])
     if mmproj is not None:
         command.extend(["--mmproj", str(mmproj)])
     started = time.monotonic()
-    first_token_at: float | None = None
-    chunks: list[str] = []
-    proc = subprocess.Popen(
+    completed = subprocess.run(
         command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
-        bufsize=1,
         env=env,
+        check=False,
+        stdin=subprocess.DEVNULL,
+        start_new_session=True,
     )
-    assert proc.stdout is not None
-    assert proc.stderr is not None
-    while True:
-        line = proc.stdout.readline()
-        if line == "" and proc.poll() is not None:
-            break
-        if not line:
-            continue
-        if first_token_at is None and line.strip():
-            first_token_at = time.monotonic()
-        chunks.append(line)
-    stderr = proc.stderr.read()
     finished = time.monotonic()
-    if proc.returncode != 0:
-        raise RuntimeError(f"{cli.name} failed ({proc.returncode}): {stderr[-2000:]}")
-    combined = "".join(chunks) + "\n" + stderr
+    if completed.returncode != 0:
+        err = (completed.stderr or "") + "\n" + (completed.stdout or "")
+        raise RuntimeError(f"{cli.name} failed ({completed.returncode}): {err[-2000:]}")
+    combined = (completed.stdout or "") + "\n" + (completed.stderr or "")
     timings = parse_llama_timings(combined)
-    generated = _generated_text("".join(chunks), prompt)
+    generated = _generated_text(completed.stdout or "", prompt)
     tokens = int(timings.get("eval_tokens") or 0)
     eval_ms = float(timings.get("eval_ms") or 0)
     tokens_per_second = timings.get("generation_tps")
     if tokens_per_second is None and tokens and eval_ms:
         tokens_per_second = tokens / (eval_ms / 1000.0)
-    elif tokens_per_second is None and tokens and first_token_at is not None:
-        tokens_per_second = tokens / max(finished - first_token_at, 1e-6)
+    wall = finished - started
+    ttft = None
+    if timings.get("load_ms") is not None and timings.get("prompt_eval_ms") is not None:
+        ttft = (float(timings["load_ms"]) + float(timings["prompt_eval_ms"])) / 1000.0
+    elif generated:
+        ttft = wall
     return {
         "generated_text": generated,
         "load_seconds": timings.get("load_ms", 0) / 1000.0
         if timings.get("load_ms")
         else None,
-        "time_to_first_token_seconds": (
-            (float(timings["load_ms"]) + float(timings["prompt_eval_ms"])) / 1000.0
-            if timings.get("load_ms") is not None
-            and timings.get("prompt_eval_ms") is not None
-            else ((first_token_at - started) if first_token_at else None)
-        ),
-        "boot_to_first_token_seconds": (first_token_at - started)
-        if first_token_at
-        else None,
+        "time_to_first_token_seconds": ttft,
+        "boot_to_first_token_seconds": ttft,
         "tokens_per_second": tokens_per_second,
         "eval_tokens": tokens,
         "llama_stderr_timings": timings,
@@ -344,7 +330,7 @@ def _run_llama_cli(
             "prompt_tps": timings.get("prompt_tps"),
             "generation_tps": timings.get("generation_tps"),
         },
-        "wall_seconds": finished - started,
+        "wall_seconds": wall,
     }
 
 
@@ -394,8 +380,16 @@ def run_llama_bench(
             pp32 = avg
         if n_gen == 32 and (n_prompt in (0, None)):
             tg32 = avg
-        model_size = row.get("size_gib") or row.get("model_size") or model_size
-        params = row.get("params") or params
+        raw_size = row.get("size_gib") or row.get("model_size")
+        if isinstance(raw_size, (int, float)) and raw_size > 64:
+            model_size = round(float(raw_size) / (1024**3), 2)
+        elif raw_size is not None:
+            model_size = raw_size
+        n_params = row.get("model_n_params") or row.get("params")
+        if isinstance(n_params, int) and n_params > 1000:
+            params = f"{n_params / 1_000_000_000:.2f}B"
+        elif n_params is not None:
+            params = str(n_params)
     return {
         "model_size_gib": model_size,
         "params": params,
@@ -403,7 +397,6 @@ def run_llama_bench(
         "threads": os.cpu_count() or 4,
         "pp32_tokens_per_second": pp32,
         "tg32_tokens_per_second": tg32,
-        "raw_rows": rows,
     }
 
 
@@ -424,8 +417,8 @@ def _run_image_smoke(
             prompt=DEFAULT_IMAGE_PROMPT,
             max_tokens=16,
             env=env,
-            extra_args=("--reasoning", "off"),
             extra_media=("--image", str(png)),
+            single_turn=False,
         )
         return {"ok": True, "prompt": DEFAULT_IMAGE_PROMPT, **result}
     except RuntimeError as exc:
@@ -449,8 +442,9 @@ def _run_audio_smoke(
             prompt="<__media__>",
             max_tokens=32,
             env=env,
-            extra_args=("--reasoning", "off", "-sys", DEFAULT_AUDIO_PROMPT),
+            extra_args=("-sys", DEFAULT_AUDIO_PROMPT),
             extra_media=("--audio", str(wav)),
+            single_turn=False,
         )
         return {"ok": True, "prompt": DEFAULT_AUDIO_PROMPT, **result}
     except RuntimeError as exc:
@@ -475,7 +469,11 @@ def parse_llama_timings(stderr: str) -> dict[str, float]:
     return timings
 
 
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
 def _generated_text(stdout: str, prompt: str) -> str:
+    stdout = ANSI_RE.sub("", stdout)
     marker = f"> {prompt}"
     if marker in stdout:
         after = stdout.split(marker, 1)[1]

@@ -1,0 +1,349 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "models": {
+    "d1-2b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "d1-2b",
+      "model": "LiquidAI/d1-2B",
+      "runtime": "transformers 5.19+",
+      "prompt": "I was charged twice. Please refund one charge.",
+      "generated_text": "{\"refund\": {\"type\": \"noul\", \"noul\": 0.99809637511562}}",
+      "time_to_first_token_seconds": 15.131865450999953,
+      "boot_to_first_token_seconds": 15.131865450999953,
+      "tokens_per_second": null,
+      "eval_tokens": 0,
+      "weight_bytes": 3836417920,
+      "wall_seconds": 17.44690931799994,
+      "modalities": {
+        "text": {
+          "ok": true,
+          "answers": {
+            "refund": {
+              "type": "noul",
+              "noul": 0.99809637511562
+            }
+          }
+        },
+        "image": {
+          "ok": true,
+          "answers": {
+            "red": {
+              "type": "noul",
+              "noul": 0.9991623420768859
+            }
+          }
+        }
+      }
+    },
+    "d1-omni-2b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "d1-omni-2b",
+      "model": "LiquidAI/d1-Omni-2B",
+      "runtime": "transformers 5.19+",
+      "prompt": "I was charged twice. Please refund one charge.",
+      "generated_text": "{\"refund\": {\"type\": \"noul\", \"noul\": 0.9477342468973988}}",
+      "time_to_first_token_seconds": 17.894858502000034,
+      "boot_to_first_token_seconds": 17.894858502000034,
+      "tokens_per_second": null,
+      "eval_tokens": 0,
+      "weight_bytes": 4333941640,
+      "wall_seconds": 20.959436364,
+      "modalities": {
+        "text": {
+          "ok": true,
+          "answers": {
+            "refund": {
+              "type": "noul",
+              "noul": 0.9477342468973988
+            }
+          }
+        },
+        "image": {
+          "ok": true,
+          "answers": {
+            "red": {
+              "type": "noul",
+              "noul": 0.9586744300480022
+            }
+          }
+        },
+        "audio": {
+          "ok": true,
+          "answers": {
+            "speech": {
+              "type": "noul",
+              "noul": 0.36686070377857777
+            }
+          }
+        }
+      }
+    },
+    "lfm3-1.7b-base": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "lfm3-1.7b-base",
+      "model": "LiquidAI/LFM3-1.7B-Base",
+      "runtime": "transformers",
+      "prompt": "Reply with the single word pong.",
+      "generated_text": "Reply with the single word pong.  \n**Explanation:** The function `is_palindrome` checks whether a string reads the same forwards and backwards. It first converts the input to lowercase and strips non\u2011",
+      "time_to_first_token_seconds": 13.715111589999992,
+      "boot_to_first_token_seconds": 13.715111589999992,
+      "tokens_per_second": 6.023975404792104,
+      "eval_tokens": 32,
+      "weight_bytes": 3457635448,
+      "wall_seconds": 19.027218272000027,
+      "modalities": {
+        "text": {
+          "ok": true,
+          "prompt": "Reply with the single word pong."
+        }
+      }
+    },
+    "lfm3-1.7b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 15,
+      "model": "LiquidAI/LFM3-1.7B-GGUF",
+      "gguf": "LFM3-1.7B-Q4_K_M.gguf",
+      "runtime": "llama.cpp b11938",
+      "prompt": "Reply with the single word pong.",
+      "max_tokens": 32,
+      "generated_text": "PONG",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 4.939,
+      "boot_to_first_token_seconds": 4.939,
+      "tokens_per_second": 21.5,
+      "eval_tokens": 0,
+      "weight_bytes": 1099627808,
+      "llama_cli_timings": {
+        "prompt_tps": 105.1,
+        "generation_tps": 21.5
+      },
+      "llama_bench": {
+        "model_size_gib": 1.02,
+        "params": "1.73B",
+        "backend": "CPU",
+        "threads": 4,
+        "pp32_tokens_per_second": 279.18,
+        "tg32_tokens_per_second": 21.45
+      },
+      "wall_seconds": 5.177,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host."
+    },
+    "lfm3-audio-2b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "lfm3-audio-2b",
+      "model": "LiquidAI/LFM3-Audio-2B-GGUF",
+      "gguf": "LFM3-Audio-2B-Q4_K_M.gguf",
+      "mmproj": "mmproj-LFM3-Audio-2B-Q8_0.gguf",
+      "runtime": "llama.cpp b11941",
+      "prompt": "Reply with the single word pong.",
+      "max_tokens": 32,
+      "generated_text": "[Start thinking]\nWe need to respond with a single word \"pong\". The user asks: \"Reply with the single word pong.\"\nThus we must output",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 4.503233373000057,
+      "boot_to_first_token_seconds": 4.503233373000057,
+      "tokens_per_second": 22.7,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {
+        "prompt_tps": 103.1,
+        "generation_tps": 22.7
+      },
+      "llama_cli_timings": {
+        "prompt_tps": 103.1,
+        "generation_tps": 22.7
+      },
+      "wall_seconds": 4.503233373000057,
+      "weight_bytes": 1099626016,
+      "mmproj_bytes": 337862080,
+      "llama_bench": {
+        "model_size_gib": 1.02,
+        "params": "1.73B",
+        "backend": "CPU",
+        "threads": 4,
+        "pp32_tokens_per_second": 246.442832,
+        "tg32_tokens_per_second": 22.531035
+      },
+      "modalities": {
+        "text": {
+          "ok": true,
+          "prompt": "Reply with the single word pong."
+        },
+        "audio": {
+          "ok": true,
+          "prompt": "Perform ASR in English.",
+          "generated_text": "Uh, uh,",
+          "load_seconds": null,
+          "time_to_first_token_seconds": 2.6640393029999814,
+          "boot_to_first_token_seconds": 2.6640393029999814,
+          "tokens_per_second": null,
+          "eval_tokens": 0,
+          "llama_stderr_timings": {},
+          "llama_cli_timings": {
+            "prompt_tps": null,
+            "generation_tps": null
+          },
+          "wall_seconds": 2.6640393029999814
+        }
+      }
+    },
+    "lfm3-omni-2b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "lfm3-omni-2b",
+      "model": "LiquidAI/LFM3-Omni-2B-GGUF",
+      "gguf": "LFM3-Omni-2B-Q4_K_M.gguf",
+      "mmproj": "mmproj-LFM3-Omni-2B-Q8_0.gguf",
+      "runtime": "llama.cpp b11941",
+      "prompt": "Reply with the single word pong.",
+      "max_tokens": 32,
+      "generated_text": "pong",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 2.6356538469999578,
+      "boot_to_first_token_seconds": 2.6356538469999578,
+      "tokens_per_second": 22.6,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {
+        "prompt_tps": 111.5,
+        "generation_tps": 22.6
+      },
+      "llama_cli_timings": {
+        "prompt_tps": 111.5,
+        "generation_tps": 22.6
+      },
+      "wall_seconds": 2.6356538469999578,
+      "weight_bytes": 1099630080,
+      "mmproj_bytes": 540892768,
+      "llama_bench": {
+        "model_size_gib": 1.02,
+        "params": "1.73B",
+        "backend": "CPU",
+        "threads": 4,
+        "pp32_tokens_per_second": 275.090406,
+        "tg32_tokens_per_second": 24.473707
+      },
+      "modalities": {
+        "text": {
+          "ok": true,
+          "prompt": "Reply with the single word pong."
+        },
+        "image": {
+          "ok": true,
+          "prompt": "What is the dominant color in this image? Reply with one word.",
+          "generated_text": "<think></think>Red",
+          "load_seconds": null,
+          "time_to_first_token_seconds": 3.377369511999973,
+          "boot_to_first_token_seconds": 3.377369511999973,
+          "tokens_per_second": null,
+          "eval_tokens": 0,
+          "llama_stderr_timings": {},
+          "llama_cli_timings": {
+            "prompt_tps": null,
+            "generation_tps": null
+          },
+          "wall_seconds": 3.377369511999973
+        },
+        "audio": {
+          "ok": true,
+          "prompt": "Perform ASR in English.",
+          "generated_text": "<think></think>Oh.",
+          "load_seconds": null,
+          "time_to_first_token_seconds": 2.2987492139999404,
+          "boot_to_first_token_seconds": 2.2987492139999404,
+          "tokens_per_second": null,
+          "eval_tokens": 0,
+          "llama_stderr_timings": {},
+          "llama_cli_timings": {
+            "prompt_tps": null,
+            "generation_tps": null
+          },
+          "wall_seconds": 2.2987492139999404
+        }
+      }
+    },
+    "lfm3-vl-2b": {
+      "host": "cloud_vm_not_sealed",
+      "host_cpu": "Intel(R) Xeon(R) Processor",
+      "host_vcpu": 4,
+      "host_memory_gib": 16,
+      "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+      "model_id": "lfm3-vl-2b",
+      "model": "LiquidAI/LFM3-VL-2B-GGUF",
+      "gguf": "LFM3-VL-2B-Q4_K_M.gguf",
+      "mmproj": "mmproj-LFM3-VL-2B-Q8_0.gguf",
+      "runtime": "llama.cpp b11938",
+      "prompt": "Reply with the single word pong.",
+      "max_tokens": 32,
+      "generated_text": "pong",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 2.381627449000007,
+      "boot_to_first_token_seconds": 2.381627449000007,
+      "tokens_per_second": 24.8,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {
+        "prompt_tps": 128.3,
+        "generation_tps": 24.8
+      },
+      "llama_cli_timings": {
+        "prompt_tps": 128.3,
+        "generation_tps": 24.8
+      },
+      "wall_seconds": 2.381627449000007,
+      "weight_bytes": 1099627808,
+      "mmproj_bytes": 203031872,
+      "llama_bench": {
+        "model_size_gib": 1.02,
+        "params": "1.73B",
+        "backend": "CPU",
+        "threads": 4,
+        "pp32_tokens_per_second": 302.36353,
+        "tg32_tokens_per_second": 23.753117
+      },
+      "modalities": {
+        "text": {
+          "ok": true,
+          "prompt": "Reply with the single word pong."
+        },
+        "image": {
+          "ok": true,
+          "prompt": "What is the dominant color in this image? Reply with one word.",
+          "generated_text": "Red",
+          "load_seconds": null,
+          "time_to_first_token_seconds": 2.9467463559999487,
+          "boot_to_first_token_seconds": 2.9467463559999487,
+          "tokens_per_second": null,
+          "eval_tokens": 0,
+          "llama_stderr_timings": {},
+          "llama_cli_timings": {
+            "prompt_tps": null,
+            "generation_tps": null
+          },
+          "wall_seconds": 2.9467463559999487
+        }
+      }
+    }
+  }
+}

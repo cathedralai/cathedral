@@ -1,0 +1,77 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "model_id": "lfm3-omni-2b",
+  "model": "LiquidAI/LFM3-Omni-2B-GGUF",
+  "gguf": "LFM3-Omni-2B-Q4_K_M.gguf",
+  "mmproj": "mmproj-LFM3-Omni-2B-Q8_0.gguf",
+  "runtime": "llama.cpp b11941",
+  "prompt": "Reply with the single word pong.",
+  "max_tokens": 32,
+  "generated_text": "pong",
+  "load_seconds": null,
+  "time_to_first_token_seconds": 2.6356538469999578,
+  "boot_to_first_token_seconds": 2.6356538469999578,
+  "tokens_per_second": 22.6,
+  "eval_tokens": 0,
+  "llama_stderr_timings": {
+    "prompt_tps": 111.5,
+    "generation_tps": 22.6
+  },
+  "llama_cli_timings": {
+    "prompt_tps": 111.5,
+    "generation_tps": 22.6
+  },
+  "wall_seconds": 2.6356538469999578,
+  "weight_bytes": 1099630080,
+  "mmproj_bytes": 540892768,
+  "llama_bench": {
+    "model_size_gib": 1.02,
+    "params": "1.73B",
+    "backend": "CPU",
+    "threads": 4,
+    "pp32_tokens_per_second": 275.090406,
+    "tg32_tokens_per_second": 24.473707
+  },
+  "modalities": {
+    "text": {
+      "ok": true,
+      "prompt": "Reply with the single word pong."
+    },
+    "image": {
+      "ok": true,
+      "prompt": "What is the dominant color in this image? Reply with one word.",
+      "generated_text": "<think></think>Red",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 3.377369511999973,
+      "boot_to_first_token_seconds": 3.377369511999973,
+      "tokens_per_second": null,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {},
+      "llama_cli_timings": {
+        "prompt_tps": null,
+        "generation_tps": null
+      },
+      "wall_seconds": 3.377369511999973
+    },
+    "audio": {
+      "ok": true,
+      "prompt": "Perform ASR in English.",
+      "generated_text": "<think></think>Oh.",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 2.2987492139999404,
+      "boot_to_first_token_seconds": 2.2987492139999404,
+      "tokens_per_second": null,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {},
+      "llama_cli_timings": {
+        "prompt_tps": null,
+        "generation_tps": null
+      },
+      "wall_seconds": 2.2987492139999404
+    }
+  }
+}

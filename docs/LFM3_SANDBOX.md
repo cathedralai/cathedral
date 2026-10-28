@@ -75,7 +75,7 @@ different license.
 
 Numbers from `python scripts/lfm3_cpu_benchmark.py` and
 `python scripts/lfm3_suite_cpu_benchmark.py` on the cloud agent VM (4 vCPU
-Intel Xeon, 15 GiB RAM). They are not sealed-host numbers. The live sealed
+Intel Xeon, 16 GiB RAM). They are not sealed-host numbers. The live sealed
 run waits for spend approval.
 
 ### LFM3-1.7B (already measured)
@@ -92,18 +92,88 @@ run waits for spend approval.
 | Suggested sandbox memory | 4 GiB |
 | Estimated image size | about 1.2 GiB (debian-slim plus llama.cpp plus GGUF). Image is not built or published. |
 
-### Other published models
+### LFM3-1.7B-Base (Transformers CPU, BF16)
 
-Fill from `docs/evidence/<template>-cpu-benchmark.json` after the cloud VM
-suite run. Until that file exists for a model, treat CPU numbers as not yet
-measured on this VM.
+Pretrain checkpoint. It does not follow the chat prompt. Numbers include
+model load.
+
+| Measurement | Value |
+|---|---|
+| Safetensors on disk | 3,457,635,448 bytes |
+| One prompt ("Reply with the single word pong.") | continuation, not `pong` |
+| Process start to first token | 13.72 s (load plus prefill) |
+| Generation | 6.02 tokens/s |
+| Wall | 19.03 s |
+
+### LFM3-VL-2B (llama.cpp b11938)
+
+| Measurement | Value |
+|---|---|
+| GGUF plus mmproj on disk | 1,099,627,808 + 203,031,872 bytes |
+| Text prompt | answer `pong` |
+| Process start to first token | 2.38 s |
+| Generation | 24.8 tokens/s |
+| Prompt processing (same run) | 128.3 tokens/s |
+| llama-bench pp32 | 302.36 tokens/s |
+| llama-bench tg32 | 23.75 tokens/s |
+| Image prompt (solid red PNG) | answer `Red` in 2.95 s |
+
+### LFM3-Audio-2B (llama.cpp b11941)
+
+| Measurement | Value |
+|---|---|
+| GGUF plus mmproj on disk | 1,099,626,016 + 337,862,080 bytes |
+| Text prompt | thinking trace, then cut at 32 tokens |
+| Process start to first token | 4.50 s |
+| Generation | 22.7 tokens/s |
+| Prompt processing (same run) | 103.1 tokens/s |
+| llama-bench pp32 | 246.44 tokens/s |
+| llama-bench tg32 | 22.53 tokens/s |
+| Audio prompt (1 s 440 Hz tone, ASR) | answer `Uh, uh,` in 2.66 s |
+
+### LFM3-Omni-2B (llama.cpp b11941)
+
+| Measurement | Value |
+|---|---|
+| GGUF plus mmproj on disk | 1,099,630,080 + 540,892,768 bytes |
+| Text prompt | answer `pong` |
+| Process start to first token | 2.64 s |
+| Generation | 22.6 tokens/s |
+| Prompt processing (same run) | 111.5 tokens/s |
+| llama-bench pp32 | 275.09 tokens/s |
+| llama-bench tg32 | 24.47 tokens/s |
+| Image prompt (solid red PNG) | answer `Red` in 3.38 s |
+| Audio prompt (1 s 440 Hz tone) | answer `Oh.` in 2.30 s |
+
+### d1-2B (Transformers CPU, BF16)
+
+Decision model. No generated tokens. Numbers include model load.
+
+| Measurement | Value |
+|---|---|
+| Safetensors on disk | 3,836,417,920 bytes |
+| Text: "Is the customer asking for a refund?" | P(yes) 0.998 |
+| Process start to first decision | 15.13 s |
+| Wall (text plus image) | 17.45 s |
+| Image: "Is the picture mostly red?" | P(yes) 0.999 |
+
+### d1-Omni-2B (Transformers CPU, BF16)
+
+| Measurement | Value |
+|---|---|
+| Safetensors on disk | 4,333,941,640 bytes |
+| Text: "Is the customer asking for a refund?" | P(yes) 0.948 |
+| Process start to first decision | 17.89 s |
+| Wall (text plus image plus audio) | 20.96 s |
+| Image: "Is the picture mostly red?" | P(yes) 0.959 |
+| Audio: "Does someone speak?" on a 440 Hz tone | P(yes) 0.367 |
 
 ```bash
 python scripts/lfm3_cpu_benchmark.py --model-id lfm3-1.7b --report docs/evidence/lfm3-1.7b-cpu-benchmark.json
 python scripts/lfm3_suite_cpu_benchmark.py
 ```
 
-Raw JSON: `docs/evidence/lfm3-1.7b-cpu-benchmark.json` and
+Raw JSON: `docs/evidence/<template>-cpu-benchmark.json` and
 `docs/evidence/lfm3-suite-cpu-benchmark.json`.
 
 ## Sealed test (paid, opt-in)

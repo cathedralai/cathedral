@@ -1,0 +1,61 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "model_id": "lfm3-audio-2b",
+  "model": "LiquidAI/LFM3-Audio-2B-GGUF",
+  "gguf": "LFM3-Audio-2B-Q4_K_M.gguf",
+  "mmproj": "mmproj-LFM3-Audio-2B-Q8_0.gguf",
+  "runtime": "llama.cpp b11941",
+  "prompt": "Reply with the single word pong.",
+  "max_tokens": 32,
+  "generated_text": "[Start thinking]\nWe need to respond with a single word \"pong\". The user asks: \"Reply with the single word pong.\"\nThus we must output",
+  "load_seconds": null,
+  "time_to_first_token_seconds": 4.503233373000057,
+  "boot_to_first_token_seconds": 4.503233373000057,
+  "tokens_per_second": 22.7,
+  "eval_tokens": 0,
+  "llama_stderr_timings": {
+    "prompt_tps": 103.1,
+    "generation_tps": 22.7
+  },
+  "llama_cli_timings": {
+    "prompt_tps": 103.1,
+    "generation_tps": 22.7
+  },
+  "wall_seconds": 4.503233373000057,
+  "weight_bytes": 1099626016,
+  "mmproj_bytes": 337862080,
+  "llama_bench": {
+    "model_size_gib": 1.02,
+    "params": "1.73B",
+    "backend": "CPU",
+    "threads": 4,
+    "pp32_tokens_per_second": 246.442832,
+    "tg32_tokens_per_second": 22.531035
+  },
+  "modalities": {
+    "text": {
+      "ok": true,
+      "prompt": "Reply with the single word pong."
+    },
+    "audio": {
+      "ok": true,
+      "prompt": "Perform ASR in English.",
+      "generated_text": "Uh, uh,",
+      "load_seconds": null,
+      "time_to_first_token_seconds": 2.6640393029999814,
+      "boot_to_first_token_seconds": 2.6640393029999814,
+      "tokens_per_second": null,
+      "eval_tokens": 0,
+      "llama_stderr_timings": {},
+      "llama_cli_timings": {
+        "prompt_tps": null,
+        "generation_tps": null
+      },
+      "wall_seconds": 2.6640393029999814
+    }
+  }
+}

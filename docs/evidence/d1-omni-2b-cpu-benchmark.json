@@ -1,0 +1,47 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "model_id": "d1-omni-2b",
+  "model": "LiquidAI/d1-Omni-2B",
+  "runtime": "transformers 5.19+",
+  "prompt": "I was charged twice. Please refund one charge.",
+  "generated_text": "{\"refund\": {\"type\": \"noul\", \"noul\": 0.9477342468973988}}",
+  "time_to_first_token_seconds": 17.894858502000034,
+  "boot_to_first_token_seconds": 17.894858502000034,
+  "tokens_per_second": null,
+  "eval_tokens": 0,
+  "weight_bytes": 4333941640,
+  "wall_seconds": 20.959436364,
+  "modalities": {
+    "text": {
+      "ok": true,
+      "answers": {
+        "refund": {
+          "type": "noul",
+          "noul": 0.9477342468973988
+        }
+      }
+    },
+    "image": {
+      "ok": true,
+      "answers": {
+        "red": {
+          "type": "noul",
+          "noul": 0.9586744300480022
+        }
+      }
+    },
+    "audio": {
+      "ok": true,
+      "answers": {
+        "speech": {
+          "type": "noul",
+          "noul": 0.36686070377857777
+        }
+      }
+    }
+  }
+}
