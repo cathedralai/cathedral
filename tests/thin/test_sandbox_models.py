@@ -63,7 +63,7 @@ def test_lfm3_1_7b_catalog_fields() -> None:
     assert model.min_runtime_version == "b11938"
     assert model.gpu_required is False
     assert model.live is True
-    assert model.recommended_memory_gib == 4
+    assert model.recommended_memory_gib == 8
     assert model.license_url == LFM_OPEN_LICENSE_URL
     assert "vLLM" in model.runtimes
     assert "transformers" in model.runtimes
@@ -187,7 +187,7 @@ def test_catalog_templates_match_standard_catalog_shape() -> None:
         entry["image"]
         == "ghcr.io/cathedralai/room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761"
     )
-    assert entry["resources"] == {"cpu": 1, "memory_gib": 4}
+    assert entry["resources"] == {"cpu": 2, "memory_gib": 8}
     assert entry["live"] is True
     assert "internet" in entry["network_modes"]
     assert "llama.cpp" in str(entry["description"])
