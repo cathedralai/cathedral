@@ -1,0 +1,38 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "model_id": "d1-2b",
+  "model": "LiquidAI/d1-2B",
+  "runtime": "transformers 5.19+",
+  "prompt": "I was charged twice. Please refund one charge.",
+  "generated_text": "{\"refund\": {\"type\": \"noul\", \"noul\": 0.99809637511562}}",
+  "time_to_first_token_seconds": 15.131865450999953,
+  "boot_to_first_token_seconds": 15.131865450999953,
+  "tokens_per_second": null,
+  "eval_tokens": 0,
+  "weight_bytes": 3836417920,
+  "wall_seconds": 17.44690931799994,
+  "modalities": {
+    "text": {
+      "ok": true,
+      "answers": {
+        "refund": {
+          "type": "noul",
+          "noul": 0.99809637511562
+        }
+      }
+    },
+    "image": {
+      "ok": true,
+      "answers": {
+        "red": {
+          "type": "noul",
+          "noul": 0.9991623420768859
+        }
+      }
+    }
+  }
+}

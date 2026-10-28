@@ -1,0 +1,32 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 15,
+  "model": "LiquidAI/LFM3-1.7B-GGUF",
+  "gguf": "LFM3-1.7B-Q4_K_M.gguf",
+  "runtime": "llama.cpp b11938",
+  "prompt": "Reply with the single word pong.",
+  "max_tokens": 32,
+  "generated_text": "PONG",
+  "load_seconds": null,
+  "time_to_first_token_seconds": 4.939,
+  "boot_to_first_token_seconds": 4.939,
+  "tokens_per_second": 21.5,
+  "eval_tokens": 0,
+  "weight_bytes": 1099627808,
+  "llama_cli_timings": {
+    "prompt_tps": 105.1,
+    "generation_tps": 21.5
+  },
+  "llama_bench": {
+    "model_size_gib": 1.02,
+    "params": "1.73B",
+    "backend": "CPU",
+    "threads": 4,
+    "pp32_tokens_per_second": 279.18,
+    "tg32_tokens_per_second": 21.45
+  },
+  "wall_seconds": 5.177,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host."
+}

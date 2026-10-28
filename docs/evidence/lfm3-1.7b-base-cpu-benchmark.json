@@ -1,0 +1,24 @@
+{
+  "host": "cloud_vm_not_sealed",
+  "host_cpu": "Intel(R) Xeon(R) Processor",
+  "host_vcpu": 4,
+  "host_memory_gib": 16,
+  "note": "Measured on the cloud agent VM. Not a sealed AMD SEV-SNP host.",
+  "model_id": "lfm3-1.7b-base",
+  "model": "LiquidAI/LFM3-1.7B-Base",
+  "runtime": "transformers",
+  "prompt": "Reply with the single word pong.",
+  "generated_text": "Reply with the single word pong.  \n**Explanation:** The function `is_palindrome` checks whether a string reads the same forwards and backwards. It first converts the input to lowercase and strips non\u2011",
+  "time_to_first_token_seconds": 13.715111589999992,
+  "boot_to_first_token_seconds": 13.715111589999992,
+  "tokens_per_second": 6.023975404792104,
+  "eval_tokens": 32,
+  "weight_bytes": 3457635448,
+  "wall_seconds": 19.027218272000027,
+  "modalities": {
+    "text": {
+      "ok": true,
+      "prompt": "Reply with the single word pong."
+    }
+  }
+}
