@@ -6,7 +6,13 @@ Sealed sandboxes use ``POST /v1/workers`` with ``profile: custom.v1`` and
 """
 
 from .catalog import (
+    D1_2B_ID,
+    D1_OMNI_2B_ID,
+    LFM3_1_7B_BASE_ID,
     LFM3_1_7B_ID,
+    LFM3_AUDIO_2B_ID,
+    LFM3_OMNI_2B_ID,
+    LFM3_VL_2B_ID,
     LFM_OPEN_LICENSE_URL,
     LFM_OPEN_LICENSE_VERSION,
     SandboxModel,
@@ -24,7 +30,13 @@ from .license_terms import (
 
 __all__ = [
     "COMMERCIAL_REVENUE_THRESHOLD_USD",
+    "D1_2B_ID",
+    "D1_OMNI_2B_ID",
+    "LFM3_1_7B_BASE_ID",
     "LFM3_1_7B_ID",
+    "LFM3_AUDIO_2B_ID",
+    "LFM3_OMNI_2B_ID",
+    "LFM3_VL_2B_ID",
     "LFM_OPEN_LICENSE_SECTION_5",
     "LFM_OPEN_LICENSE_URL",
     "LFM_OPEN_LICENSE_VERSION",
