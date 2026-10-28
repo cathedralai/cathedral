@@ -154,7 +154,7 @@ def test_sealed_create_uses_custom_v1_and_workload_image() -> None:
         ssh_public_key="ssh-ed25519 AAAA",
     )
     assert body["profile"] == "custom.v1"
-    assert body["workload"] == {"image": "cathedral/lfm3-1.7b:q4_k_m"}
+    assert body["workload"] == {"image": "ghcr.io/cathedralai/room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761"}
     assert body["resources"] == {
         "hardware_class": "tdx_cpu",
         "cpu": 4,
@@ -181,7 +181,7 @@ def test_catalog_templates_match_standard_catalog_shape() -> None:
     assert len(templates) == 7
     by_name = {entry["name"]: entry for entry in templates}
     entry = by_name[LFM3_1_7B_ID]
-    assert entry["image"] == "cathedral/lfm3-1.7b:q4_k_m"
+    assert entry["image"] == "ghcr.io/cathedralai/room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761"
     assert entry["resources"] == {"cpu": 1, "memory_gib": 4}
     assert entry["live"] is False
     assert "internet" in entry["network_modes"]
@@ -253,7 +253,7 @@ def test_sealed_probe_body_is_custom_v1(monkeypatch: MonkeyPatch) -> None:
     assert body["profile"] == "custom.v1"
     workload = body["workload"]
     assert isinstance(workload, dict)
-    assert str(workload["image"]).endswith("lfm3-1.7b:q4_k_m")
+    assert "room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761" in str(workload["image"])
     assert str(body["name"]).startswith(LFM3_1_7B_ID)
 
 

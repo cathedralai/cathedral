@@ -27,8 +27,8 @@ LFM_OPEN_LICENSE_VERSION = "LFM Open License v1.0"
 LFM_OPEN_LICENSE_URL = "https://huggingface.co/LiquidAI/LFM3-1.7B/blob/main/LICENSE"
 LFM_OPEN_LICENSE_GUIDE_URL = "https://docs.liquid.ai/lfm/help/model-license"
 
-# Built from images/<id>. Not published to a registry by this change.
-LFM3_IMAGE_REF = "cathedral/lfm3-1.7b:q4_k_m"
+# lfm3-1.7b is published on GHCR (Spock). Other suite images still local-only.
+LFM3_IMAGE_REF = "ghcr.io/cathedralai/room-lfm3-1.7b@sha256:b1ba8837ea388c8c98720772b0f41af5813d4cebf214637fde20aae58a1ea761"
 LFM3_BASE_IMAGE_REF = "cathedral/lfm3-1.7b-base:bf16"
 LFM3_VL_IMAGE_REF = "cathedral/lfm3-vl-2b:q4_k_m"
 LFM3_AUDIO_IMAGE_REF = "cathedral/lfm3-audio-2b:q4_k_m"
@@ -114,7 +114,7 @@ _LFM3_1_7B = SandboxModel(
     live=False,
     weight_format="gguf",
     runtimes=("llama.cpp", "vLLM", "transformers"),
-    sandbox_notes="vLLM and Transformers serve the BF16 safetensors on GPU.",
+    sandbox_notes="GHCR image published; catalog live flag stays false until site self-serve wiring. Sealed pending hotel pull.",
 )
 
 _LFM3_1_7B_BASE = SandboxModel(
