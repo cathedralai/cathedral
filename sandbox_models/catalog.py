@@ -111,10 +111,10 @@ _LFM3_1_7B = SandboxModel(
     license_id=LFM_OPEN_LICENSE_VERSION,
     license_url=LFM_OPEN_LICENSE_URL,
     gpu_required=False,
-    live=False,
+    live=True,
     weight_format="gguf",
     runtimes=("llama.cpp", "vLLM", "transformers"),
-    sandbox_notes="GHCR image published; catalog live flag stays false until site self-serve wiring. Sealed pending hotel pull.",
+    sandbox_notes="Standard self-serve on broker (GHCR pin). Sealed pending hotel pull timeout.",
 )
 
 _LFM3_1_7B_BASE = SandboxModel(
